@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<!-- <classPathEntry location="/Users/ouroc/.m2/repository/org/mybatis/mybatis/3.0.5/mybatis-3.0.5-sources.jar" 
+		/> -->
+
+	<classPathEntry location="C:\Users\Fengxiang\.m2\repository\mysql\mysql-connector-java\5.1.17\mysql-connector-java-5.1.17.jar" />
+	<context id="context1">
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/memberapp" userId="fengxiang"
+			password="hy19841015" />
+		<javaModelGenerator
+			targetPackage="com.dandelion.memberapp.dao.model"
+			targetProject="memberWebservice" />
+		<sqlMapGenerator targetPackage="com.dandelion.memberapp.dao.data"
+			targetProject="memberWebservice" />
+		<javaClientGenerator
+			targetPackage="com.dandelion.memberapp.dao.data"
+			targetProject="memberWebservice" type="XMLMAPPER" />
+
+		<table tableName="tb_user" domainObjectName="User"></table>
+		<table tableName="tb_wsusersession" domainObjectName="Wsusersession"></table>
+	</context>
+</generatorConfiguration>
