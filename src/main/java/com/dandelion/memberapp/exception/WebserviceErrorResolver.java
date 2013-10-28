@@ -5,10 +5,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dandelion.memberapp.util.JSONUtilities;
+
+
 
 public class WebserviceErrorResolver implements HandlerExceptionResolver {
 
@@ -30,6 +34,7 @@ public class WebserviceErrorResolver implements HandlerExceptionResolver {
 					WebserviceErrors.SERVER_INTERNAL_ERROR_CODE,
 					WebserviceErrors.SERVER_INTERNAL_ERROR_MESSAGE, arg3);
 		}
+		logger.error("Error catched by OoPassErrorResolver: ", exception);
 		JSONObject json = JSONUtilities.getErrorJSON(exception);
 		arg1.setStatus(Internal_Server_Error_CODE);
 		return new ModelAndView("json", "j", json.toString());
@@ -40,4 +45,5 @@ public class WebserviceErrorResolver implements HandlerExceptionResolver {
 	}
 
 	private boolean enable;
+	private Logger logger = LoggerFactory.getLogger(WebserviceErrorResolver.class);
 }

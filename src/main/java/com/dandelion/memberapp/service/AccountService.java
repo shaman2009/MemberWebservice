@@ -41,6 +41,7 @@ public class AccountService {
 		user.setId(UUID.randomUUID().toString());
 		user.setUseremail(email);
 		user.setPassword(password);
+		user.setAlias(alias);
 		user.setCreateddate(date);
 		user.setModifieddate(date);
 		accountMapper.insertUser(user);
@@ -57,22 +58,30 @@ public class AccountService {
 		}
 
 
-		// login success process.
+		//2. generate new session   
 		String identifier_decoded = Base64.decodeToString(identifier,Base64.NO_WRAP, "UTF-8").toUpperCase();
 		List<Wsusersession> slist = wsUserSessionInfoMapper.getByAll(user.getId(), identifier_decoded, packageName);
-
 		if (!slist.isEmpty()) {
 			wsUserSessionInfoMapper.delete(slist.get(0).getId());
 		}
-		
 		Wsusersession sessionInfo = new Wsusersession();
 		sessionInfo.setId(UUID.randomUUID().toString());
 		sessionInfo.setDeviceidentifier(identifier_decoded);
 		sessionInfo.setPackagename(packageName);
 		sessionInfo.setSessionkey(Math.abs(new Random().nextInt()));
 		sessionInfo.setUseridfk(user.getId());
+		sessionInfo.setCreateddate(new Date());
 		wsUserSessionInfoMapper.login(sessionInfo);
 		return sessionInfo;
+	}
+	public void updateUserInfo(User user) {
+		if (user.getGender() == null && user.getAlias() == null
+				&& user.getUsersignature() == null
+				&& user.getBirthday() == null && user.getPhonenumber() ==null) {
+			return;
+		}
+		user.setModifieddate(new Date());
+		accountMapper.updateUserInfo(user);
 	}
 	public String changePassword(String email) {
 		User user = new User();

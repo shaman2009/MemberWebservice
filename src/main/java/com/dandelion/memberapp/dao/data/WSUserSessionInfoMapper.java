@@ -25,5 +25,5 @@ public interface WSUserSessionInfoMapper {
 	Wsusersession getSessionExist(UUID ID);
 	
 	@Select("select SessionKey from tb_wsusersession where ID=#{0}")
-	Wsusersession getKeyByID(UUID ID);
+	Wsusersession getKeyByID(String ID);
 }
