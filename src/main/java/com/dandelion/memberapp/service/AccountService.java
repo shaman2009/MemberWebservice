@@ -1,5 +1,6 @@
 package com.dandelion.memberapp.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.dandelion.memberapp.dao.data.AccountMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
+import com.dandelion.memberapp.dao.model.EmailBean;
 import com.dandelion.memberapp.dao.model.User;
 import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
@@ -93,5 +95,43 @@ public class AccountService {
 //		List<User> list = accountMapper.getUserByEmail(email);
 //		String s = String.valueOf(list.size());
 		return "Dandelion";
+	}
+	public EmailBean getForgetPasswordToken(String email) throws MemberAppException {
+		if (!Utilities.checkEmailFormat(email)) {
+			throw new MemberAppException(WebserviceErrors.EMAIL_INVALID_CODE,WebserviceErrors.EMAIL_INVALID_MESSAGE);
+		}
+		User user = accountMapper.getUserByEmail(email);
+		if (user == null) {
+			throw new MemberAppException(WebserviceErrors.USER_NOT_FOUND_CODE,WebserviceErrors.USER_NOT_FOUND_MESSAGE);
+		}
+		EmailBean emailBean = getBackPassMapper.getEmailBean(user.getId());
+		
+		String key = MailUtil.spliceString(email);
+		boolean b = false;
+		try {
+			b = MailUtil.sendMailViaSpring(user, email, key);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(!b) {
+			throw new MemberAppException(WebserviceErrors.EMAIL_SEND_ERROR_CODE,WebserviceErrors.EMAIL_SEND_ERROR_MESSAGE);
+		}
+		if (emailBean == null) {
+			emailBean = new EmailBean();
+			emailBean.setId(user.getID());
+			emailBean.setToken(key);
+			Date d = new Date(System.currentTimeMillis() + OoPassContants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			emailBean.setExpire(d);
+			getBackPassMapper.insert(emailBean);
+		} else {
+			emailBean.setToken(key);
+			Date d = new Date(System.currentTimeMillis() + OoPassContants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			emailBean.setExpire(d);
+			getBackPassMapper.update(emailBean);
+		}
+
+		return emailBean;
 	}
 }

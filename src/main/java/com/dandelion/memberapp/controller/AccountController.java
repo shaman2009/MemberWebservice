@@ -8,10 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.dandelion.memberapp.dao.model.EmailBean;
 import com.dandelion.memberapp.dao.model.User;
 import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
@@ -101,6 +103,30 @@ public class AccountController {
 		} catch (ParseException e) {
 			throw new MemberAppException(WebserviceErrors.SERVER_INTERNAL_ERROR_CODE, WebserviceErrors.SERVER_INTERNAL_ERROR_MESSAGE, e);
 		}
+	}
+	
+	
+	@RequestMapping(value = "ForgetPassword")
+	@Rollback()
+	public ModelAndView getBackPassword(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
+		JSONObject json;
+		JSONObject result;
+		try {
+			json = new JSONObject(j);
+			String email = json.getString("email");
+			
+			EmailBean bean = accountService.getForgetPasswordToken(email);
+			
+			result = new JSONObject();
+			result.put("email", email);
+			result.put("token", bean.getToken());
+			result.put("expire", bean.getExpire().getTime());
+			result.put("userId", bean.getId());
+			
+		} catch (JSONException e) {
+			throw new MemberAppException(WebserviceErrors.SERVER_INTERNAL_ERROR_CODE,WebserviceErrors.SERVER_INTERNAL_ERROR_MESSAGE, e);
+		} 
+		return new ModelAndView("json", "j", result.toString());
 	}
 	@RequestMapping(value = "ChangePassword")
 	public ModelAndView changePassword(@RequestParam(value = "j", required = true) String j) throws JSONException {

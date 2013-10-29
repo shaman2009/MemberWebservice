@@ -47,4 +47,7 @@ public class WebserviceErrors {
 	
 	public static final int UPLOAD_FILE_DENIED_CODE = 1007;
 	public static final String UPLOAD_FILE_DENIED_MESSAGE = "upload file denied";
+	
+	public static final int USER_NOT_FOUND_CODE = 1011;
+	public static final String USER_NOT_FOUND_MESSAGE = "user not found";
 }
