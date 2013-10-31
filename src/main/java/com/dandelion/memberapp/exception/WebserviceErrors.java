@@ -50,4 +50,13 @@ public class WebserviceErrors {
 	
 	public static final int USER_NOT_FOUND_CODE = 1011;
 	public static final String USER_NOT_FOUND_MESSAGE = "user not found";
+	
+	public static final int EMAIL_SEND_ERROR_CODE = 1021;
+	public static final String EMAIL_SEND_ERROR_MESSAGE = "email send error";
+	
+	public static final int FORGET_PASSWORD_TOKEN_NOT_FOUND = 1031;
+	public static final String FORGET_PASSWORD_TOKEN_NOT_FOUND_MESSAGE = "invalid forget password token";
+	
+	public static final int FORGET_PASSWORD_TOKEN_EXPIRED = 1032;
+	public static final String FORGET_PASSWORD_TOKEN_EXPIRED_MESSAGE = "token expired";
 }

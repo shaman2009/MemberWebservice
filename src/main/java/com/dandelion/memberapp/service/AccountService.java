@@ -1,22 +1,32 @@
 package com.dandelion.memberapp.service;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.dandelion.memberapp.Contants.Contants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
-import com.dandelion.memberapp.dao.model.EmailBean;
+import com.dandelion.memberapp.dao.model.Emailbean;
 import com.dandelion.memberapp.dao.model.User;
 import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.util.Base64;
+import com.dandelion.memberapp.util.ByteUtilities;
+import com.dandelion.memberapp.util.MailUtil;
 import com.dandelion.memberapp.util.Utilities;
 
 @Service
@@ -96,42 +106,97 @@ public class AccountService {
 //		String s = String.valueOf(list.size());
 		return "Dandelion";
 	}
-	public EmailBean getForgetPasswordToken(String email) throws MemberAppException {
+	
+	public Emailbean getForgetPasswordToken(final String email) throws MemberAppException {
 		if (!Utilities.checkEmailFormat(email)) {
 			throw new MemberAppException(WebserviceErrors.EMAIL_INVALID_CODE,WebserviceErrors.EMAIL_INVALID_MESSAGE);
 		}
-		User user = accountMapper.getUserByEmail(email);
+		final User user = accountMapper.getUserByEmail(email);
 		if (user == null) {
 			throw new MemberAppException(WebserviceErrors.USER_NOT_FOUND_CODE,WebserviceErrors.USER_NOT_FOUND_MESSAGE);
 		}
-		EmailBean emailBean = getBackPassMapper.getEmailBean(user.getId());
+		Emailbean emailBean = accountMapper.getEmailBean(user.getId());
 		
-		String key = MailUtil.spliceString(email);
-		boolean b = false;
+		final String key = MailUtil.spliceString(email);
+		
 		try {
-			b = MailUtil.sendMailViaSpring(user, email, key);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			AsyncTaskExecutor task = new SimpleAsyncTaskExecutor();
+			task.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						boolean b = false;
+						b = MailUtil.sendMailViaSpring(user, email, key);
+						if(!b) {
+							throw new MemberAppException(WebserviceErrors.EMAIL_SEND_ERROR_CODE,WebserviceErrors.EMAIL_SEND_ERROR_MESSAGE);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if(!b) {
-			throw new MemberAppException(WebserviceErrors.EMAIL_SEND_ERROR_CODE,WebserviceErrors.EMAIL_SEND_ERROR_MESSAGE);
-		}
+
 		if (emailBean == null) {
-			emailBean = new EmailBean();
-			emailBean.setId(user.getID());
+			emailBean = new Emailbean();
+			emailBean.setId(user.getId());
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + OoPassContants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
-			getBackPassMapper.insert(emailBean);
+			accountMapper.insert(emailBean);
 		} else {
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + OoPassContants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
-			getBackPassMapper.update(emailBean);
+			accountMapper.update(emailBean);
 		}
 
 		return emailBean;
 	}
+	
+	public boolean checkForgetPasswordToken(String forgetPasswordToken) {
+		Emailbean emailBean = accountMapper.getEmailBeanByToken(forgetPasswordToken);
+		if (emailBean == null) {
+			return false;
+		}
+		if (emailBean.getExpire().before(new Date())) {
+			return false;
+		}
+		return true;
+	}
+	@Transactional(value = "user", rollbackFor = { SQLException.class })
+	public void forgetPassword(String forgetPasswordToken, String newPassword)
+			throws MemberAppException {
+		String password_md5;
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			password_md5 = ByteUtilities.toHexString(md.digest(newPassword.getBytes("UTF-8")));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+
+		Emailbean emailBean = accountMapper.getEmailBeanByToken(forgetPasswordToken);
+		if (emailBean == null) {
+			throw new MemberAppException(
+					WebserviceErrors.FORGET_PASSWORD_TOKEN_NOT_FOUND,
+					WebserviceErrors.FORGET_PASSWORD_TOKEN_NOT_FOUND_MESSAGE);
+		}
+
+		if (emailBean.getExpire().before(new Date())) {
+			// expired
+			throw new MemberAppException(
+					WebserviceErrors.FORGET_PASSWORD_TOKEN_EXPIRED,
+					WebserviceErrors.FORGET_PASSWORD_TOKEN_EXPIRED_MESSAGE);
+		}
+
+		User user = accountMapper.getUserByID(emailBean.getId());
+		accountMapper.updatePass(user.getId(), password_md5);
+		accountMapper.delete(emailBean.getId());
+
+	}
+
 }

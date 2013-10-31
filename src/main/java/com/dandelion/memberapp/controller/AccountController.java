@@ -3,17 +3,19 @@ package com.dandelion.memberapp.controller;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dandelion.memberapp.dao.model.EmailBean;
+import com.dandelion.memberapp.dao.model.Emailbean;
 import com.dandelion.memberapp.dao.model.User;
 import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
@@ -107,7 +109,6 @@ public class AccountController {
 	
 	
 	@RequestMapping(value = "ForgetPassword")
-	@Rollback()
 	public ModelAndView getBackPassword(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
 		JSONObject json;
 		JSONObject result;
@@ -115,7 +116,7 @@ public class AccountController {
 			json = new JSONObject(j);
 			String email = json.getString("email");
 			
-			EmailBean bean = accountService.getForgetPasswordToken(email);
+			Emailbean bean = accountService.getForgetPasswordToken(email);
 			
 			result = new JSONObject();
 			result.put("email", email);
@@ -127,6 +128,29 @@ public class AccountController {
 			throw new MemberAppException(WebserviceErrors.SERVER_INTERNAL_ERROR_CODE,WebserviceErrors.SERVER_INTERNAL_ERROR_MESSAGE, e);
 		} 
 		return new ModelAndView("json", "j", result.toString());
+	}
+	
+	//web
+	@RequestMapping(value = "ResetPassword", method = RequestMethod.GET)
+	public String resetPassword(Locale locale, Model model, @RequestParam(value = "key", required = true) String key) {
+//		boolean b = accountService.checkForgetPasswordToken(key);
+//		model.addAttribute("key",key);
+//		if(b) {
+//			return "forgetpassword";
+//		} else {
+//			return "error";
+//		}
+		
+		return "forgetpassword";
+	}
+	//web
+	@RequestMapping(value = "SubmitResetPassword")
+	public String submitResetPassword(Model model, @RequestParam(value = "password") String password, @RequestParam(value = "key") String key) throws MemberAppException {
+		model.addAttribute("password",password);
+		model.addAttribute("key",key);
+		accountService.forgetPassword(key, password);
+		
+		return "success";
 	}
 	@RequestMapping(value = "ChangePassword")
 	public ModelAndView changePassword(@RequestParam(value = "j", required = true) String j) throws JSONException {
