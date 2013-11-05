@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -6,14 +7,15 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Stylish Portfolio Template for Bootstrap</title>
+    <title>MemberApp</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="../resources/css/bootstrap.css" rel="stylesheet">
+    <link href="<c:url value="/resources/css/bootstrap.css" />" rel="stylesheet">
 
     <!-- Add custom CSS here -->
-    <link href="../resources/css/stylish-portfolio.css" rel="stylesheet">
-    <link href="../resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+   
+    <link href= "<c:url value="/resources/css/stylish-portfolio.css" />" rel="stylesheet">
+    <link href= "<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet">
   </head>
 
   <body>
@@ -32,7 +34,7 @@
                 <!-- Text input-->
                 <label class="control-label" for="input01">New Password</label>
                 <div class="controls">
-                  <input type="text" style="cursor:default;" class="btn input-xlarge">
+                  <input type="password" style="cursor:default;" class="btn input-xlarge">
                   <p class="help-block"></p>
                 </div>
               </div>
@@ -42,7 +44,7 @@
                 <!-- Text input-->
                 <label class="control-label" for="input01">Confirm</label>
                 <div class="controls">
-                  <input type="text" style="cursor:default;" class="btn input-xlarge">
+                  <input type="password" style="cursor:default;" class="btn input-xlarge">
                   <p class="help-block"></p>
                 </div>
               </div>
@@ -66,8 +68,8 @@
 
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="../resources/js/jquery.js"></script>
-  <script src="../resources/js/bootstrap.js"></script>
+  <script src="<c:url value="/resources/js/jquery.js" />"></script>
+   <script src="<c:url value="/resources/js/bootstrap.js" />"></script>
 
 
   </body>
