@@ -86,6 +86,10 @@
 			<mapping path="/**" />
 			<exclude-mapping path="/Register"/>
 			<exclude-mapping path="/Login"/>
+			<exclude-mapping path="/ForgetPassword"/>
+			<exclude-mapping path="/"/>
+			<exclude-mapping path="/ResetPassword"/>
+			<exclude-mapping path="/resources/**"/>
 			<beans:bean
 				class="com.dandelion.memberapp.interceptors.AuthorizedSignatureValidationInterceptor">
 			</beans:bean>

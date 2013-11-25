@@ -62,9 +62,21 @@ public interface AccountMapper {
 	@ResultMap(USERBASERESULTMAP)
 	List<User> searchUser(String key);
 	
+	@Select("select * from tb_friend where fromuseridfk = #{0} and targetuseridfk = #{1}")
+	@ResultMap(FRIENDBASERESULTMAP)
+	List<Friend> selectFriend(Long fromUserId, Long targetUserId);
+	
+	@Select("select * from tb_friend t inner join tb_user b on t.targetuseridfk = b.id where fromuseridfk = #{0}")
+	@ResultMap(USERBASERESULTMAP)
+	List<User> selectFollowings(Long userId);
+	
+	@Select("select * from tb_friend t inner join tb_user b on t.fromuseridfk = b.id where targetuseridfk = #{0}")
+	@ResultMap(USERBASERESULTMAP)
+	List<User> selectFollowers(Long userId);
+	
 	int follow(Friend friend);
 	
 	//SET SQL_SAFE_UPDATES=0;
-	@Delete("delete from tb_friend where #{0} = '' and targetuseridfk = #{1}")
+	@Delete("delete from tb_friend where fromuseridfk = #{0} and targetuseridfk = #{1}")
 	int deleteFriend(Long fromUserId, Long targetUserId);
 }

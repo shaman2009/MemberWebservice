@@ -28,6 +28,7 @@ import com.dandelion.memberapp.interceptors.UserAuthentication;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
+import com.dandelion.memberapp.model.vo.FriendsInfo;
 import com.dandelion.memberapp.model.vo.LoginInfo;
 import com.dandelion.memberapp.model.vo.ResponseResult;
 import com.dandelion.memberapp.model.vo.UserInfo;
@@ -158,38 +159,60 @@ public class AccountController {
 	}
 	
 	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.PUT) 
-	public ResponseEntity<ResponseResult> follow(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) {
+	public ResponseEntity<ResponseResult> follow(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
 		User user = userAuthentication.getCurrentUser();
 		accountService.follow(user.getId(), id);
 		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "ForgetPassword")
-	public ModelAndView getBackPassword(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
-		JSONObject json;
-		JSONObject result;
-		try {
-			json = new JSONObject(j);
-			String email = json.getString("email");
-			
-			Emailbean bean = accountService.getForgetPasswordToken(email);
-			
-			result = new JSONObject();
-			result.put("email", email);
-			result.put("token", bean.getToken());
-			result.put("expire", bean.getExpire().getTime());
-			result.put("userId", bean.getId());
-			
-		} catch (JSONException e) {
-			throw new MemberAppException(WebserviceErrors.SERVER_INTERNAL_ERROR_CODE,WebserviceErrors.SERVER_INTERNAL_ERROR_MESSAGE, e);
-		} 
-		return new ModelAndView("json", "j", result.toString());
+	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.DELETE) 
+	public ResponseEntity<ResponseResult> unfollow(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) {
+		User user = userAuthentication.getCurrentUser();
+		accountService.unfollow(user.getId(), id);
+		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.GET) 
+	public ResponseEntity<FriendsInfo> getFriends(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) {
+		User self = userAuthentication.getCurrentUser();
+		List<UserInfo> voFollowings = new ArrayList<UserInfo>();
+		List<UserInfo> voFollowers = new ArrayList<UserInfo>();
+		List<User> followings = accountService.selectFollowings(self.getId());
+		for (User user : followings) {
+			UserInfo info = new UserInfo();
+			info.setId(user.getId());
+			info.setAlias(user.getAlias());
+			info.setAvatar(user.getAvataridfk());
+			info.setAccounttype(user.getAccounttype());
+			voFollowings.add(info);
+		}
+		List<User> followers = accountService.selectFollowers(self.getId());
+		for (User user : followers) {
+			UserInfo info = new UserInfo();
+			info.setId(user.getId());
+			info.setAlias(user.getAlias());
+			info.setAvatar(user.getAvataridfk());
+			info.setAccounttype(user.getAccounttype());
+			voFollowers.add(info);
+		}
+		FriendsInfo friendsInfo = new FriendsInfo();
+		friendsInfo.setVoFollowers(voFollowers);
+		friendsInfo.setVoFollowings(voFollowings);
+		return new ResponseEntity<FriendsInfo>(friendsInfo, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/ForgetPassword", method = RequestMethod.POST)
+	public ResponseEntity<ResponseResult> getBackPassword(@RequestParam(value = "j", required = true) String j) throws MemberAppException, JSONException {
+		JSONObject json = new JSONObject(j);
+		String email = json.getString("email");
+		accountService.getForgetPasswordToken(email);
+		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}
 	
 	
 	//web
-	@RequestMapping(value = "ResetPassword", method = RequestMethod.GET)
-	public String resetPassword(Locale locale, Model model, @RequestParam(value = "key", required = true) String key) {
+	@RequestMapping(value = "/ResetPassword", method = RequestMethod.GET)
+	public String resetPassword(Locale locale, Model model, @RequestParam(value = "key", required = false) String key) {
 //		boolean b = accountService.checkForgetPasswordToken(key);
 //		model.addAttribute("key",key);
 //		if(b) {
@@ -203,15 +226,14 @@ public class AccountController {
 	
 	
 	//web
-	@RequestMapping(value = "SubmitResetPassword")
+	@RequestMapping(value = "/SubmitResetPassword", method = RequestMethod.POST)
 	public String submitResetPassword(Model model, @RequestParam(value = "password") String password, @RequestParam(value = "key") String key) throws MemberAppException {
 		model.addAttribute("password",password);
 		model.addAttribute("key",key);
 		accountService.forgetPassword(key, password);
-		
-		return "success";
+		return "forgetpassword";
 	}
-	@RequestMapping(value = "ChangePassword")
+	@RequestMapping(value = "/ChangePassword/{email}", method = RequestMethod.POST)
 	public ModelAndView changePassword(@RequestParam(value = "j", required = true) String j) throws JSONException {
 			JSONObject json = new JSONObject(j);
 			String email = json.getString("email");

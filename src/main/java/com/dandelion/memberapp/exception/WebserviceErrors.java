@@ -59,4 +59,7 @@ public class WebserviceErrors {
 	
 	public static final int FORGET_PASSWORD_TOKEN_EXPIRED = 1032;
 	public static final String FORGET_PASSWORD_TOKEN_EXPIRED_MESSAGE = "token expired";
+	
+	public static final int TARGETUSERID_INVALID_CODE = 1040;
+	public static final String TARGETUSERID_INVALID_MESSAGE = "you could not follow yourself";
 }

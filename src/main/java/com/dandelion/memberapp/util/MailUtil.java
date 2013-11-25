@@ -125,16 +125,14 @@ public class MailUtil {
 		String setFromEmail = getProperties().getProperty(FROMMAIL);
 		JavaMailSenderImpl senderImpl = new JavaMailSenderImpl();
 		senderImpl.setUsername(getProperties().getProperty(USERNAME)); // 根据自己的情况,设置username
-		senderImpl.setPassword(getProperties().getProperty(PASSWORD)); // 根据自己的情况,
-																		// 设置password
+		senderImpl.setPassword(getProperties().getProperty(PASSWORD)); 
 		Properties prop = getSessionProperties();
 		prop.put("mail.smtp.timeout", "25000");
 		senderImpl.setJavaMailProperties(prop);
 		senderImpl.setHost(getSessionProperties().getProperty(MAILHOST));
 
 		MimeMessage mailMessage = senderImpl.createMimeMessage();
-		MimeMessageHelper messageHelper = new MimeMessageHelper(mailMessage,
-				true, "utf-8");
+		MimeMessageHelper messageHelper = new MimeMessageHelper(mailMessage, true, "utf-8");
 		messageHelper.setTo(toMail);
 		messageHelper.setFrom(setFromEmail);
 		messageHelper.setSubject(subject);

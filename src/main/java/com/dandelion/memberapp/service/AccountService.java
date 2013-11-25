@@ -87,11 +87,33 @@ public class AccountService {
 		wsUserSessionInfoMapper.login(sessionInfo);
 		return sessionInfo;
 	}
-	public int follow(Long fromId, Long targetId) {
+	public int follow(Long fromId, Long targetId) throws MemberAppException {
+		if(fromId.equals(targetId)) {
+			throw new MemberAppException(WebserviceErrors.TARGETUSERID_INVALID_CODE,WebserviceErrors.TARGETUSERID_INVALID_MESSAGE); 
+		}
+		List<Friend> friends = accountMapper.selectFriend(fromId, targetId);
+		if(friends.size() > 0) {
+			return 1;
+		}
 		Friend friend = new Friend();
 		friend.setFromuseridfk(fromId);
 		friend.setTargetuseridfk(targetId);
+		// follows + 1 followers + 1
 		return accountMapper.follow(friend);
+	}
+	public int unfollow(Long fromId, Long targetId) {
+		// follows - 1 followers - 1
+		return accountMapper.deleteFriend(fromId, targetId);
+	}
+	public List<User> selectFollowings(Long userId) {
+		List<User> users = accountMapper.selectFollowings(userId);
+		// follows - 1 followers - 1
+		return users;
+	}
+	public List<User> selectFollowers(Long userId) {
+		List<User> users = accountMapper.selectFollowers(userId);
+		// follows - 1 followers - 1
+		return users;
 	}
 	public void updateUserInfo(User user) {
 		if (user.getGender() == null && user.getAlias() == null
@@ -121,7 +143,6 @@ public class AccountService {
 		List<User> users = accountMapper.searchUser(key);
 		return users;
 	}
-	
 	public Emailbean getForgetPasswordToken(final String email) throws MemberAppException {
 		if (!Utilities.checkEmailFormat(email)) {
 			throw new MemberAppException(WebserviceErrors.EMAIL_INVALID_CODE,WebserviceErrors.EMAIL_INVALID_MESSAGE);

@@ -1,9 +1,9 @@
 package com.memberapp.rest.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+/**
+ * @author FengxiangZhu
+ *
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration({ "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml" })
@@ -30,11 +34,14 @@ public class AccountTest {
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
 	private static final String REGISTERURL = "/Register";
-	private static final String ACCOUNTURL = "/Accounts";
 	private static final String LOGINURL = "/Login";
-
+	private static final String ACCOUNTURL = "/Accounts";
+	private static final String FRIENDURL = "/Friends";
+	private static final String FEEDURL = "/Feeds";
+	private static final String TIMELINE = "/Timeline";
+	private static final String FORGETPASSWORDURL = "/ForgetPassword";
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
@@ -74,30 +81,22 @@ public class AccountTest {
 					.param("j", loginRequestParams.toString()))
 					.andDo(print())
 					.andExpect(status().isOk());
-					
-		
 	}
+	
+	@Test
+	public void ForgetPasswordTest() throws Exception {
+		JSONObject forgetPasswordRequestParams = new JSONObject();
+		forgetPasswordRequestParams.put("email", "wow2009zfx@gmail.com");
+		this.mockMvc.perform(post(FORGETPASSWORDURL)
+					.param("j", forgetPasswordRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}	
 	@Test
 	public void UpdateUserTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
-		JSONObject registerRequestParams = new JSONObject();
-		registerRequestParams.put("email", email);
-		registerRequestParams.put("password", password);
-		registerRequestParams.put("accountType", 0);
-		registerRequestParams.put("alias", UUID.randomUUID().toString());
-		this.mockMvc.perform(post(REGISTERURL)
-					.param("j", registerRequestParams.toString()))
-					.andExpect(status().isOk());
-		JSONObject loginRequestParams = new JSONObject();
-		loginRequestParams.put("email", email);
-		loginRequestParams.put("password", password);
-		loginRequestParams.put("packageName", "com.dandelion.memberapp");
-		loginRequestParams.put("identifier", UUID.randomUUID());
-		String loginResponse = this.mockMvc.perform(post(LOGINURL)
-					.param("j", loginRequestParams.toString()))
-					.andExpect(status().isOk())
-					.andReturn().getResponse().getContentAsString();
+		String loginResponse = loginAndRegister(email, password);
 		JSONObject response = new JSONObject(loginResponse);
 		String sid = response.getString("sid");
 		String userId = response.getString("userId");
@@ -114,23 +113,7 @@ public class AccountTest {
 	public void SearchUserTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
-		JSONObject registerRequestParams = new JSONObject();
-		registerRequestParams.put("email", email);
-		registerRequestParams.put("password", password);
-		registerRequestParams.put("accountType", 0);
-		registerRequestParams.put("alias", UUID.randomUUID().toString());
-		this.mockMvc.perform(post(REGISTERURL)
-					.param("j", registerRequestParams.toString()))
-					.andExpect(status().isOk());
-		JSONObject loginRequestParams = new JSONObject();
-		loginRequestParams.put("email", email);
-		loginRequestParams.put("password", password);
-		loginRequestParams.put("packageName", "com.dandelion.memberapp");
-		loginRequestParams.put("identifier", UUID.randomUUID());
-		String loginResponse = this.mockMvc.perform(post(LOGINURL)
-					.param("j", loginRequestParams.toString()))
-					.andExpect(status().isOk())
-					.andReturn().getResponse().getContentAsString();
+		String loginResponse = loginAndRegister(email, password);
 		JSONObject response = new JSONObject(loginResponse);
 		String sid = response.getString("sid");
 		String userId = response.getString("userId");
@@ -147,6 +130,117 @@ public class AccountTest {
 	public void getUserInfoTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
+		String loginResponse = loginAndRegister(email, password);
+		JSONObject response = new JSONObject(loginResponse);
+		String sid = response.getString("sid");
+		String userId = response.getString("userId");
+		JSONObject getUserRequestParams = new JSONObject();
+		getUserRequestParams.put("alias", "updateAliasTest");
+		getUserRequestParams.put("sid", sid);
+		this.mockMvc.perform(get(ACCOUNTURL + "/" + userId)
+					.param("j", getUserRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void followTest() throws Exception {
+		String email = UUID.randomUUID().toString() + "@junit.com";
+		String password = UUID.randomUUID().toString();
+		String loginResponse = loginAndRegister(email, password);
+		String targetemail = UUID.randomUUID().toString() + "@junit.com";
+		String targetpassword = UUID.randomUUID().toString();
+		String targetLoginResponse = loginAndRegister(targetemail, targetpassword);
+		JSONObject response = new JSONObject(loginResponse);
+		String sid = response.getString("sid");
+		String userId = response.getString("userId");
+		JSONObject targetResponse = new JSONObject(targetLoginResponse);
+		String targetSid = targetResponse.getString("sid");
+		String targetUserId = targetResponse.getString("userId");
+		//follow
+		JSONObject followRequestParams = new JSONObject();
+		followRequestParams.put("sid", sid);
+		this.mockMvc.perform(put(FRIENDURL + "/" + targetUserId)
+					.param("j", followRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void unFollowTest() throws Exception {
+		String email = UUID.randomUUID().toString() + "@junit.com";
+		String password = UUID.randomUUID().toString();
+		String loginResponse = loginAndRegister(email, password);
+		String targetemail = UUID.randomUUID().toString() + "@junit.com";
+		String targetpassword = UUID.randomUUID().toString();
+		String targetLoginResponse = loginAndRegister(targetemail, targetpassword);
+		JSONObject response = new JSONObject(loginResponse);
+		String sid = response.getString("sid");
+		String userId = response.getString("userId");
+		JSONObject targetResponse = new JSONObject(targetLoginResponse);
+		String targetSid = targetResponse.getString("sid");
+		String targetUserId = targetResponse.getString("userId");
+		//follow
+		JSONObject followRequestParams = new JSONObject();
+		followRequestParams.put("sid", sid);
+		this.mockMvc.perform(put(FRIENDURL + "/" + targetUserId)
+					.param("j", followRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+		//unfollow
+		this.mockMvc.perform(delete(FRIENDURL + "/" + targetUserId)
+					.param("j", followRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void postFeedTest() throws Exception {
+		String email = UUID.randomUUID().toString() + "@junit.com";
+		String password = UUID.randomUUID().toString();
+		String loginResponse = loginAndRegister(email, password);
+		JSONObject response = new JSONObject(loginResponse);
+		String sid = response.getString("sid");
+		String userId = response.getString("userId");
+		//postFeed
+		JSONObject postRequestParams = new JSONObject();
+		postRequestParams.put("sid", sid);
+		postRequestParams.put("content", "Dandelion is perfect");
+		postRequestParams.put("imageURL", "www.google.com");
+		postRequestParams.put("title", "Dandelion");
+		this.mockMvc.perform(post(FEEDURL)
+					.param("j", postRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}
+	@Test
+	public void getTimelineTest() throws Exception {
+		String email = UUID.randomUUID().toString() + "@junit.com";
+		String password = UUID.randomUUID().toString();
+		String loginResponse = loginAndRegister(email, password);
+		JSONObject response = new JSONObject(loginResponse);
+		String sid = response.getString("sid");
+		String userId = response.getString("userId");
+		//postFeed
+		JSONObject postRequestParams = new JSONObject();
+		postRequestParams.put("sid", sid);
+		postRequestParams.put("content", "Dandelion is perfect");
+		postRequestParams.put("imageURL", "www.google.com");
+		postRequestParams.put("title", "Dandelion");
+		this.mockMvc.perform(post(FEEDURL)
+					.param("j", postRequestParams.toString()))
+					.andExpect(status().isOk());
+		//getTimeline
+		JSONObject getTimelineRequestParams = new JSONObject();
+		getTimelineRequestParams.put("sid", sid);
+		this.mockMvc.perform(get(ACCOUNTURL + "/"  + userId + TIMELINE)
+					.param("j", getTimelineRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+	}
+
+	
+	public String loginAndRegister(String email, String password) throws Exception {
 		JSONObject registerRequestParams = new JSONObject();
 		registerRequestParams.put("email", email);
 		registerRequestParams.put("password", password);
@@ -164,18 +258,8 @@ public class AccountTest {
 					.param("j", loginRequestParams.toString()))
 					.andExpect(status().isOk())
 					.andReturn().getResponse().getContentAsString();
-		JSONObject response = new JSONObject(loginResponse);
-		String sid = response.getString("sid");
-		String userId = response.getString("userId");
-		JSONObject updateUserRequestParams = new JSONObject();
-		updateUserRequestParams.put("alias", "updateAliasTest");
-		updateUserRequestParams.put("sid", sid);
-		this.mockMvc.perform(get(ACCOUNTURL + "/" + userId)
-					.param("j", updateUserRequestParams.toString()))
-					.andDo(print())
-					.andExpect(status().isOk());
+		return loginResponse;
 	}
-
 	public void AccountGetTest() throws Exception {
 		this.mockMvc.perform(get("/Account/Test")
 					.param("j", "8210")
