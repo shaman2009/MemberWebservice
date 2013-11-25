@@ -28,12 +28,7 @@ public class DebugDumpInterceptor extends HandlerInterceptorAdapter {
 			return;
 		logger.info(">>>>>>>>>>>>End Request: " + request.getRequestURI()
 				+ " ");
-		if(modelAndView.getModelMap().containsAttribute("j")){
-			logger.info("<<<<<<<<<<<< Response: " + modelAndView.getModelMap().get("j")
-					+ " ");
-		}else{
-			logger.info("<<<<<<<<<<<< Response: not a webservice response.");
-		}
+		logger.info("<<<<<<<<<<<< Response: ");
 		return;
 	};
 

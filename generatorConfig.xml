@@ -4,13 +4,13 @@
 	<!-- <classPathEntry location="/Users/ouroc/.m2/repository/org/mybatis/mybatis/3.0.5/mybatis-3.0.5-sources.jar" 
 		/> -->
 
-	<classPathEntry location="C:\Users\fengxiangzhu\.m2\repository\mysql\mysql-connector-java\5.1.17\mysql-connector-java-5.1.17.jar" />
+	<classPathEntry location="C:\Users\fengxiang\.m2\repository\mysql\mysql-connector-java\5.1.17\mysql-connector-java-5.1.17.jar" />
 	<context id="context1">
 		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
 			connectionURL="jdbc:mysql://localhost:3306/memberapp" userId="fengxiang"
 			password="fengxiang" />
 		<javaModelGenerator
-			targetPackage="com.dandelion.memberapp.dao.model"
+			targetPackage="com.dandelion.memberapp.model.po"
 			targetProject="memberWebservice" />
 		<sqlMapGenerator targetPackage="com.dandelion.memberapp.dao.data"
 			targetProject="memberWebservice" />
@@ -21,5 +21,6 @@
 		<table tableName="tb_user" domainObjectName="User"></table>
 		<table tableName="tb_wsusersession" domainObjectName="Wsusersession"></table>
 		<table tableName="tb_emailbean" domainObjectName="Emailbean"></table>
+		<table tableName="tb_friend" domainObjectName="Friend"></table>
 	</context>
 </generatorConfiguration>

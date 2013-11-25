@@ -12,13 +12,12 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.dandelion.memberapp.dao.data.AccountMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
-import com.dandelion.memberapp.dao.model.User;
-import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
+import com.dandelion.memberapp.model.po.User;
+import com.dandelion.memberapp.model.po.Wsusersession;
 
-public class AuthorizedSignatureValidationInterceptor extends
-		HandlerInterceptorAdapter {
+public class AuthorizedSignatureValidationInterceptor extends HandlerInterceptorAdapter {
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request,
@@ -46,10 +45,8 @@ public class AuthorizedSignatureValidationInterceptor extends
 //			UUID usid = UUID.fromString(sid);
 			Wsusersession actualSession = wsUserSessionInfoMapper.getKeyByID(sid);
 			if (actualSession == null) {
-				throw new MemberAppException(WebserviceErrors.SESSION_EXPIRED_CODE,
-						WebserviceErrors.SESSION_EXPIRED_MESSAGE);
+				throw new MemberAppException(WebserviceErrors.SESSION_EXPIRED_CODE, WebserviceErrors.SESSION_EXPIRED_MESSAGE);
 			}
-
 			User user = accountMapper.getBySessionID(sid);
 			if (user == null) {
 				throw new MemberAppException(

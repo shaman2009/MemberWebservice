@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -19,11 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dandelion.memberapp.contants.Contants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
-import com.dandelion.memberapp.dao.model.Emailbean;
-import com.dandelion.memberapp.dao.model.User;
-import com.dandelion.memberapp.dao.model.Wsusersession;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
+import com.dandelion.memberapp.model.po.Emailbean;
+import com.dandelion.memberapp.model.po.Friend;
+import com.dandelion.memberapp.model.po.User;
+import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.util.Base64;
 import com.dandelion.memberapp.util.ByteUtilities;
 import com.dandelion.memberapp.util.MailUtil;
@@ -37,7 +37,7 @@ public class AccountService {
 	private WSUserSessionInfoMapper wsUserSessionInfoMapper;
 	
 	//select ID from tb_TestConnection oopass
-	public void register(String email, String password, String alias) throws MemberAppException {
+	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
 		//1.check email format
 		if (!Utilities.checkEmailFormat(email)) {
 			throw new MemberAppException(WebserviceErrors.EMAIL_INVALID_CODE, WebserviceErrors.EMAIL_INVALID_MESSAGE);
@@ -50,12 +50,12 @@ public class AccountService {
 		//3.insert userinfo into database
 		user = new User();
 		Date date = new Date();
-		user.setId(UUID.randomUUID().toString());
 		user.setUseremail(email);
 		user.setPassword(password);
 		user.setAlias(alias);
 		user.setCreateddate(date);
 		user.setModifieddate(date);
+		user.setAccounttype(accountType);
 		accountMapper.insertUser(user);
 	}
 	public Wsusersession login(String email, String password, String packageName, String identifier) throws MemberAppException {
@@ -83,8 +83,15 @@ public class AccountService {
 		sessionInfo.setSessionkey(Math.abs(new Random().nextInt()));
 		sessionInfo.setUseridfk(user.getId());
 		sessionInfo.setCreateddate(new Date());
+		sessionInfo.setAccounttype(user.getAccounttype());
 		wsUserSessionInfoMapper.login(sessionInfo);
 		return sessionInfo;
+	}
+	public int follow(Long fromId, Long targetId) {
+		Friend friend = new Friend();
+		friend.setFromuseridfk(fromId);
+		friend.setTargetuseridfk(targetId);
+		return accountMapper.follow(friend);
 	}
 	public void updateUserInfo(User user) {
 		if (user.getGender() == null && user.getAlias() == null
@@ -97,14 +104,22 @@ public class AccountService {
 	}
 	public String changePassword(String email) {
 		User user = new User();
-		String id = UUID.randomUUID().toString();
-		user.setId(id);
 		user.setPassword(email);
 		user.setUseremail(email);
 		accountMapper.insertUser(user);
 //		List<User> list = accountMapper.getUserByEmail(email);
 //		String s = String.valueOf(list.size());
 		return "Dandelion";
+	}
+	
+	public User getUserInfo(Long userId) {
+		User user = accountMapper.getUserByID(userId);
+		return user;
+	}
+	public List<User> searchUser(String key) {
+		key = "%" + key + "%";
+		List<User> users = accountMapper.searchUser(key);
+		return users;
 	}
 	
 	public Emailbean getForgetPasswordToken(final String email) throws MemberAppException {

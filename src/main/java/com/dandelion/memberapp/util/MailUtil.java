@@ -20,7 +20,7 @@ import javax.mail.internet.MimeUtility;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
-import com.dandelion.memberapp.dao.model.User;
+import com.dandelion.memberapp.model.po.User;
 
 /**
  * @author liuzhenguo
