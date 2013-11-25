@@ -69,7 +69,7 @@
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="<c:url value="/resources/js/jquery.js" />"></script>
-   <script src="<c:url value="/resources/js/bootstrap.js" />"></script>
+  <script src="<c:url value="/resources/js/bootstrap.js" />"></script>
 
 
   </body>
