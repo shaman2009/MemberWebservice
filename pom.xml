@@ -297,7 +297,22 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+
+
+
+
+
+		<dependency>
+			<groupId>com.qiniu</groupId>
+			<artifactId>sdk</artifactId>
+			<version>6.0.0</version>
+		</dependency>
 	</dependencies>
+
+
+
+
+
 	<build>
 		<!-- Copy xml files to main output folder, because the compiler will not 
 			copy files other than ".java". -->

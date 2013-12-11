@@ -25,7 +25,6 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.interceptors.UserAuthentication;
-import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.model.vo.FriendsInfo;
