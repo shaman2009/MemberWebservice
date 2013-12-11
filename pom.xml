@@ -297,6 +297,23 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+
+
+		<dependency>
+			<groupId>com.baidu.bcs</groupId>
+			<artifactId>bcs-sdk</artifactId>
+			<version>1.4.5</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/bcs-sdk.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.baidu.bcs</groupId>
+			<artifactId>flexjson</artifactId>
+			<version>1.4.5</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/flexjson.jar</systemPath>
+		</dependency>
 	</dependencies>
 	<build>
 		<!-- Copy xml files to main output folder, because the compiler will not 

@@ -25,7 +25,6 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.interceptors.UserAuthentication;
-import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.model.vo.FriendsInfo;
@@ -45,7 +44,7 @@ public class AccountController {
 	@Autowired
 	private UserAuthentication userAuthentication;
 	
-	@RequestMapping(value = "Register", method = RequestMethod.POST)
+	@RequestMapping(value = "/Register", method = RequestMethod.POST)
 	public ResponseEntity<ResponseResult> register(@RequestParam(value = "j", required = true) String j)throws  JSONException, MemberAppException {
 
 		JSONObject json = new JSONObject(j);
@@ -233,7 +232,7 @@ public class AccountController {
 		accountService.forgetPassword(key, password);
 		return "forgetpassword";
 	}
-	@RequestMapping(value = "/ChangePassword/{email}", method = RequestMethod.POST)
+	@RequestMapping(value = "/ChangePassword", method = RequestMethod.POST)
 	public ModelAndView changePassword(@RequestParam(value = "j", required = true) String j) throws JSONException {
 			JSONObject json = new JSONObject(j);
 			String email = json.getString("email");
