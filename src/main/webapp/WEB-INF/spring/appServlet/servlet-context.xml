@@ -83,13 +83,12 @@
 			</beans:bean>
 		</interceptor>
 				<interceptor>
-			<mapping path="/**" />
-			<exclude-mapping path="/Register"/>
-			<exclude-mapping path="/Login"/>
-			<exclude-mapping path="/ForgetPassword"/>
-			<exclude-mapping path="/"/>
-			<exclude-mapping path="/ResetPassword"/>
-			<exclude-mapping path="/resources/**"/>
+			<mapping path="/Feeds" />
+			<mapping path="/Accounts" />
+			<mapping path="/Accounts/**" />
+			<mapping path="/Friends" />
+			<mapping path="/Friends/**" />
+			<mapping path="/ChangePassword" />
 			<beans:bean
 				class="com.dandelion.memberapp.interceptors.AuthorizedSignatureValidationInterceptor">
 			</beans:bean>

@@ -1,0 +1,9 @@
+com.baidu.inf.iis.bcs
+com.baidu.inf.iis.bcs.auth
+com.baidu.inf.iis.bcs.handler
+com.baidu.inf.iis.bcs.http
+com.baidu.inf.iis.bcs.model
+com.baidu.inf.iis.bcs.policy
+com.baidu.inf.iis.bcs.request
+com.baidu.inf.iis.bcs.response
+com.baidu.inf.iis.bcs.utils
