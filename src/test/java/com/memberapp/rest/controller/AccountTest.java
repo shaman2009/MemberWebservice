@@ -215,15 +215,29 @@ public class AccountTest {
 	}
 	@Test
 	public void getTimelineTest() throws Exception {
+		
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
 		String loginResponse = loginAndRegister(email, password);
+		String targetemail = UUID.randomUUID().toString() + "@junit.com";
+		String targetpassword = UUID.randomUUID().toString();
+		String targetLoginResponse = loginAndRegister(targetemail, targetpassword);
 		JSONObject response = new JSONObject(loginResponse);
 		String sid = response.getString("sid");
 		String userId = response.getString("userId");
+		JSONObject targetResponse = new JSONObject(targetLoginResponse);
+		String targetSid = targetResponse.getString("sid");
+		String targetUserId = targetResponse.getString("userId");
+		//follow
+		JSONObject followRequestParams = new JSONObject();
+		followRequestParams.put("sid", sid);
+		this.mockMvc.perform(put(FRIENDURL + "/" + targetUserId)
+					.param("j", followRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
 		//postFeed
 		JSONObject postRequestParams = new JSONObject();
-		postRequestParams.put("sid", sid);
+		postRequestParams.put("sid", targetSid);
 		postRequestParams.put("content", "Dandelion is perfect");
 		postRequestParams.put("imageURL", "www.google.com");
 		postRequestParams.put("title", "Dandelion");

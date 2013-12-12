@@ -25,13 +25,13 @@ public class FeedService {
 		return timelineMapper.insertFeed(feed);
 	}
 	public List<Feed> getTimeline(Long userId, Long sinceId, Long maxId, Long limitCount) {
-		if(sinceId == null) {
+		if(sinceId == null || sinceId.equals(0L)) {
 			sinceId = 1L;
 		}
-		if(maxId == null) {
-			sinceId = 9999999L;
+		if(maxId == null || maxId.equals(0L)) {
+			maxId = 9999999L;
 		}
-		if(limitCount == null) {
+		if(limitCount == null || limitCount.equals(0L)) {
 			limitCount = 30L;
 		}
 		List<Feed> feeds = timelineMapper.getTimeline(userId, sinceId, maxId, limitCount);

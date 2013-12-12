@@ -61,6 +61,7 @@ public class FeedController {
 			feedinfo.setUserId(feed.getUseridfk());
 			feedinfo.setImageURL(feed.getImageurl());
 			feedinfo.setDate(feed.getCreateddate().getTime());
+			feedinfo.setContent(feed.getContent());
 			feedInfoList.add(feedinfo);
 		}
 		FeedList list = new FeedList();

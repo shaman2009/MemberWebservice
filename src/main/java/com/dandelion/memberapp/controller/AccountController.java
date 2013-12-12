@@ -56,7 +56,7 @@ public class AccountController {
 		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "Login", method = RequestMethod.POST)
+	@RequestMapping(value = "/Login", method = RequestMethod.POST)
 	public ResponseEntity<LoginInfo> login(@RequestParam(value = "j", required = true) String j) throws JSONException, MemberAppException {
 		JSONObject json = new JSONObject(j);
 		String email = json.getString("email");
