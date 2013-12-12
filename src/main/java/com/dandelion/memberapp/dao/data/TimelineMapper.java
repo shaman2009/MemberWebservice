@@ -11,7 +11,7 @@ public interface TimelineMapper {
 	
 	int insertFeed(Feed feed);
 	
-	@Select("select * from tb_feed f where f.id in ( select targetuseridfk from tb_friend t where fromuseridfk  = #{0}) and f.id >= #{1} and f.id < #{2} ;")
+	@Select("select * from tb_feed f where f.id in ( select targetuseridfk from tb_friend t where fromuseridfk  = #{0}) and f.id >= #{1} and f.id < #{2} limit #{3};")
 	@ResultMap("FeedBaseResultMap")
 	List<Feed> getTimeline(Long userId, Long sinceId, Long maxId, Long limitCount);
 	
