@@ -35,17 +35,8 @@
 			<if test="password != null">
 				Password = #{password,jdbcType=VARCHAR},
 			</if>
-			<if test="userstate != null">
-				UserState = #{userstate,jdbcType=BIT},
-			</if>
 			<if test="useremail != null">
 				UserEmail = #{useremail,jdbcType=VARCHAR},
-			</if>
-			<if test="loginstate != null">
-				LoginState = #{loginstate,jdbcType=BIT},
-			</if>
-			<if test="ipaddress != null">
-				IPAddress = #{ipaddress,jdbcType=CHAR},
 			</if>
 			<if test="createddate != null">
 				CreatedDate = #{createddate,jdbcType=TIMESTAMP},
@@ -55,18 +46,6 @@
 			</if>
 			<if test="isdeleted != null">
 				IsDeleted = #{isdeleted,jdbcType=BIT},
-			</if>
-			<if test="birthday != null">
-				Birthday = #{birthday,jdbcType=TIMESTAMP},
-			</if>
-			<if test="gender != null">
-				Gender = #{gender,jdbcType=BIT},
-			</if>
-			<if test="usersignature != null">
-				UserSignature = #{usersignature,jdbcType=VARCHAR},
-			</if>
-			<if test="avataridfk != null">
-				AvatarIDFK = #{avataridfk,jdbcType=CHAR},
 			</if>
 			<if test="friendcount != null">
 				FriendCount = #{friendcount,jdbcType=INTEGER},
@@ -82,12 +61,6 @@
 			</if>
 			<if test="registerfrom != null">
 				RegisterFrom = #{registerfrom,jdbcType=INTEGER},
-			</if>
-			<if test="backgroundurl != null">
-				BackgroundUrl = #{backgroundurl,jdbcType=VARCHAR},
-			</if>
-			<if test="phonenumber != null">
-				PhoneNumber = #{phonenumber,jdbcType=CHAR},
 			</if>
 			<if test="accounttype != null">
 				AccountType = #{accounttype,jdbcType=INTEGER},
@@ -108,17 +81,8 @@
 			<if test="password != null">
 				Password,
 			</if>
-			<if test="userstate != null">
-				UserState,
-			</if>
 			<if test="useremail != null">
 				UserEmail,
-			</if>
-			<if test="loginstate != null">
-				LoginState,
-			</if>
-			<if test="ipaddress != null">
-				IPAddress,
 			</if>
 			<if test="createddate != null">
 				CreatedDate,
@@ -128,18 +92,6 @@
 			</if>
 			<if test="isdeleted != null">
 				IsDeleted,
-			</if>
-			<if test="birthday != null">
-				Birthday,
-			</if>
-			<if test="gender != null">
-				Gender,
-			</if>
-			<if test="usersignature != null">
-				UserSignature,
-			</if>
-			<if test="avataridfk != null">
-				AvatarIDFK,
 			</if>
 			<if test="friendcount != null">
 				FriendCount,
@@ -156,12 +108,6 @@
 			<if test="registerfrom != null">
 				RegisterFrom,
 			</if>
-			<if test="backgroundurl != null">
-				BackgroundUrl,
-			</if>
-			<if test="phonenumber != null">
-				PhoneNumber,
-			</if>
 			<if test="accounttype != null">
 				AccountType,
 			</if>
@@ -176,17 +122,8 @@
 			<if test="password != null">
 				#{password,jdbcType=VARCHAR},
 			</if>
-			<if test="userstate != null">
-				#{userstate,jdbcType=BIT},
-			</if>
 			<if test="useremail != null">
 				#{useremail,jdbcType=VARCHAR},
-			</if>
-			<if test="loginstate != null">
-				#{loginstate,jdbcType=BIT},
-			</if>
-			<if test="ipaddress != null">
-				#{ipaddress,jdbcType=CHAR},
 			</if>
 			<if test="createddate != null">
 				#{createddate,jdbcType=TIMESTAMP},
@@ -196,18 +133,6 @@
 			</if>
 			<if test="isdeleted != null">
 				#{isdeleted,jdbcType=BIT},
-			</if>
-			<if test="birthday != null">
-				#{birthday,jdbcType=TIMESTAMP},
-			</if>
-			<if test="gender != null">
-				#{gender,jdbcType=BIT},
-			</if>
-			<if test="usersignature != null">
-				#{usersignature,jdbcType=VARCHAR},
-			</if>
-			<if test="avataridfk != null">
-				#{avataridfk,jdbcType=CHAR},
 			</if>
 			<if test="friendcount != null">
 				#{friendcount,jdbcType=INTEGER},
@@ -223,12 +148,6 @@
 			</if>
 			<if test="registerfrom != null">
 				#{registerfrom,jdbcType=INTEGER},
-			</if>
-			<if test="backgroundurl != null">
-				#{backgroundurl,jdbcType=VARCHAR},
-			</if>
-			<if test="phonenumber != null">
-				#{phonenumber,jdbcType=CHAR},
 			</if>
 			<if test="accounttype != null">
 				#{accounttype,jdbcType=INTEGER},
