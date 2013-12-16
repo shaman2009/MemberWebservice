@@ -9,24 +9,15 @@
 		<id column="ID" jdbcType="BIGINT" property="id" />
 		<result column="Alias" jdbcType="VARCHAR" property="alias" />
 		<result column="Password" jdbcType="VARCHAR" property="password" />
-		<result column="UserState" jdbcType="BIT" property="userstate" />
 		<result column="UserEmail" jdbcType="VARCHAR" property="useremail" />
-		<result column="LoginState" jdbcType="BIT" property="loginstate" />
-		<result column="IPAddress" jdbcType="CHAR" property="ipaddress" />
 		<result column="CreatedDate" jdbcType="TIMESTAMP" property="createddate" />
 		<result column="ModifiedDate" jdbcType="TIMESTAMP" property="modifieddate" />
 		<result column="IsDeleted" jdbcType="BIT" property="isdeleted" />
-		<result column="Birthday" jdbcType="TIMESTAMP" property="birthday" />
-		<result column="Gender" jdbcType="BIT" property="gender" />
-		<result column="UserSignature" jdbcType="VARCHAR" property="usersignature" />
-		<result column="AvatarIDFK" jdbcType="CHAR" property="avataridfk" />
 		<result column="FriendCount" jdbcType="INTEGER" property="friendcount" />
 		<result column="FanCount" jdbcType="INTEGER" property="fancount" />
 		<result column="FollowCount" jdbcType="INTEGER" property="followcount" />
 		<result column="ArticleCount" jdbcType="INTEGER" property="articlecount" />
 		<result column="RegisterFrom" jdbcType="INTEGER" property="registerfrom" />
-		<result column="BackgroundUrl" jdbcType="VARCHAR" property="backgroundurl" />
-		<result column="PhoneNumber" jdbcType="CHAR" property="phonenumber" />
 		<result column="AccountType" jdbcType="INTEGER" property="accounttype" />
 	</resultMap>
 	<resultMap id="FriendBaseResultMap" type="com.dandelion.memberapp.model.po.Friend">

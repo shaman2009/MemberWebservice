@@ -83,14 +83,9 @@ public class AccountController {
 		userinfo.setId(user.getId());
 		userinfo.setAlias(user.getAlias());
 		userinfo.setAccounttype(user.getAccounttype());
-		userinfo.setAvatar(user.getAvataridfk());
-		userinfo.setBackgroundurl(user.getBackgroundurl());
-		userinfo.setBirthday(user.getBirthday());
 		userinfo.setFancount(user.getFancount());
 		userinfo.setFollowcount(user.getFollowcount());
 		userinfo.setFriendcount(user.getFriendcount());
-		userinfo.setGender(user.getGender());
-		userinfo.setPhonenumber(user.getPhonenumber());
 		return new ResponseEntity<UserInfo>(userinfo, HttpStatus.OK);
 	}
 	@RequestMapping(value = "/Accounts", method = RequestMethod.GET)
@@ -103,7 +98,6 @@ public class AccountController {
 			UserInfo info = new UserInfo();
 			info.setId(user.getId());
 			info.setAlias(user.getAlias());
-			info.setAvatar(user.getAvataridfk());
 			info.setAccounttype(user.getAccounttype());
 			userInfos.add(info);
 		}
@@ -144,10 +138,6 @@ public class AccountController {
 			}
 			String phoneNumber = json.optString("phoneNumber");
 			user.setAlias(alias);
-			user.setBirthday(birthday2);
-			user.setGender(gender2);
-			user.setUsersignature(userSignature);
-			user.setPhonenumber(phoneNumber);
 			accountService.updateUserInfo(user);
 			return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 		} catch (JSONException e) {
@@ -181,7 +171,6 @@ public class AccountController {
 			UserInfo info = new UserInfo();
 			info.setId(user.getId());
 			info.setAlias(user.getAlias());
-			info.setAvatar(user.getAvataridfk());
 			info.setAccounttype(user.getAccounttype());
 			voFollowings.add(info);
 		}
@@ -190,7 +179,6 @@ public class AccountController {
 			UserInfo info = new UserInfo();
 			info.setId(user.getId());
 			info.setAlias(user.getAlias());
-			info.setAvatar(user.getAvataridfk());
 			info.setAccounttype(user.getAccounttype());
 			voFollowers.add(info);
 		}

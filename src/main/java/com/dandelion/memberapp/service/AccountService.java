@@ -116,11 +116,6 @@ public class AccountService {
 		return users;
 	}
 	public void updateUserInfo(User user) {
-		if (user.getGender() == null && user.getAlias() == null
-				&& user.getUsersignature() == null
-				&& user.getBirthday() == null && user.getPhonenumber() ==null) {
-			return;
-		}
 		user.setModifieddate(new Date());
 		accountMapper.updateUserInfo(user);
 	}
