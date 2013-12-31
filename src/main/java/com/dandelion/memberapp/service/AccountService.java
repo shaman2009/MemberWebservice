@@ -15,13 +15,20 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dandelion.memberapp.contants.Contants;
+import com.dandelion.memberapp.contants.MemberContants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
+import com.dandelion.memberapp.dao.data.MemberMapper;
+import com.dandelion.memberapp.dao.data.MerchantMapper;
+import com.dandelion.memberapp.dao.data.UserMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.Friend;
+import com.dandelion.memberapp.model.po.Member;
+import com.dandelion.memberapp.model.po.MemberExample;
+import com.dandelion.memberapp.model.po.Merchant;
+import com.dandelion.memberapp.model.po.MerchantExample;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.util.Base64;
@@ -35,6 +42,12 @@ public class AccountService {
 	private AccountMapper accountMapper;
 	@Autowired
 	private WSUserSessionInfoMapper wsUserSessionInfoMapper;
+	@Autowired
+	private MerchantMapper merchantMapper;
+	@Autowired
+	private MemberMapper memberMapper;
+	@Autowired
+	private UserMapper userMapper;
 	
 	//select ID from tb_TestConnection oopass
 	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
@@ -57,6 +70,15 @@ public class AccountService {
 		user.setModifieddate(date);
 		user.setAccounttype(accountType);
 		accountMapper.insertUser(user);
+		user = accountMapper.getUserByEmail(email);
+		Long userId = user.getId();
+		Long idfk = createMerchantOrMemberAccount(userId, accountType, alias);
+		if (MemberContants.ACCOUNT_TYPE_MEMBER == accountType) {
+			user.setMemberidfk(idfk);
+		} else {
+			user.setMerchantidfk(idfk);
+		}
+		userMapper.updateByPrimaryKeySelective(user);
 	}
 	public Wsusersession login(String email, String password, String packageName, String identifier) throws MemberAppException {
 
@@ -174,12 +196,12 @@ public class AccountService {
 			emailBean = new Emailbean();
 			emailBean.setId(user.getId());
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + MemberContants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
 			accountMapper.insert(emailBean);
 		} else {
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + MemberContants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
 			accountMapper.update(emailBean);
 		}
@@ -228,6 +250,33 @@ public class AccountService {
 		accountMapper.updatePass(user.getId(), password_md5);
 		accountMapper.delete(emailBean.getId());
 
+	}
+	
+	public Long createMerchantOrMemberAccount(Long userId, Integer accountType, String name) {
+		Long id = 0L;
+		Date d = new Date();
+		if (MemberContants.ACCOUNT_TYPE_MEMBER == accountType) {
+			Member member = new Member();
+			member.setUseridfk(userId);
+			member.setName(name);
+			member.setCreateddate(d);
+			member.setModifieddate(d);
+			memberMapper.insertSelective(member);
+			MemberExample memberExample = new MemberExample();
+			memberExample.createCriteria().andUseridfkEqualTo(userId);
+			id = memberMapper.selectByExample(memberExample).get(0).getId();
+		} else if (MemberContants.ACCOUNT_TYPE_MERCHANT == accountType) {
+			Merchant merchant = new Merchant();
+			merchant.setUseridfk(userId);
+			merchant.setName(name);
+			merchant.setCreateddate(d);
+			merchant.setModifieddate(d);
+			merchantMapper.insertSelective(merchant);
+			MerchantExample merchantExample = new MerchantExample();
+			merchantExample.createCriteria().andUseridfkEqualTo(userId);
+			id = merchantMapper.selectByExample(merchantExample).get(0).getId();
+		}
+		return id;
 	}
 
 }

@@ -83,7 +83,7 @@ public class AccountTest {
 					.andExpect(status().isOk());
 	}
 	
-	@Test
+//	@Test
 	public void ForgetPasswordTest() throws Exception {
 		JSONObject forgetPasswordRequestParams = new JSONObject();
 		forgetPasswordRequestParams.put("email", "wow2009zfx@gmail.com");

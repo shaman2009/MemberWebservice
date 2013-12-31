@@ -21,6 +21,6 @@ public class HomeService {
 	
 	public void testNewBae() {
 		User user = userMapper.selectByPrimaryKey(447L);
-		logger.info("Alias =====================================" + user.getAlias());
+
 	}
 }
