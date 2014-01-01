@@ -13,8 +13,8 @@
 	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
 		up static resources in the ${webappRoot}/resources directory -->
 	<resources mapping="/resources/**" location="/resources/" />
-<!-- 	<resources mapping="/resources/**" location="/WEB-INF/resources/" />      -->
-<!-- 	http://localhost:8080/OoPassWebService/resources/css/demo.css -->
+	<!-- <resources mapping="/resources/**" location="/WEB-INF/resources/" /> -->
+	<!-- http://localhost:8080/OoPassWebService/resources/css/demo.css -->
 
 
 	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
@@ -57,8 +57,7 @@
 	<!-- define the SqlSessionFactory -->
 	<beans:bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<beans:property name="dataSource" ref="dataSource" />
-		<beans:property name="typeAliasesPackage"
-			value="com.dandelion.memberapp.model.po" />
+		<beans:property name="typeAliasesPackage" value="com.dandelion.memberapp.model.po" />
 	</beans:bean>
 
 	<!-- scan for mappers and let them be autowired -->
@@ -72,7 +71,8 @@
 	<interceptors>
 		<interceptor>
 			<mapping path="/**" />
-			<beans:bean class="com.dandelion.memberapp.interceptors.DebugDumpInterceptor">
+			<beans:bean
+				class="com.dandelion.memberapp.interceptors.DebugDumpInterceptor">
 				<beans:property name="enable" value="true" />
 			</beans:bean>
 		</interceptor>
@@ -82,17 +82,24 @@
 				class="com.dandelion.memberapp.interceptors.RequestTimeCalculatorInterceptor">
 			</beans:bean>
 		</interceptor>
-				<interceptor>
+		<interceptor>
 			<mapping path="/Feeds" />
 			<mapping path="/Accounts" />
 			<mapping path="/Accounts/**" />
 			<mapping path="/Friends" />
 			<mapping path="/Friends/**" />
 			<mapping path="/ChangePassword" />
+			<mapping path="/Members" />
+			<mapping path="/Members/**" />
+			<mapping path="/Merchants" />
+			<mapping path="/Merchants/**" />
+			<mapping path="/Notifications" />
+			<mapping path="/Notifications/**" />
+			<mapping path="//Timeline/**" />
 			<beans:bean
 				class="com.dandelion.memberapp.interceptors.AuthorizedSignatureValidationInterceptor">
 			</beans:bean>
 		</interceptor>
-		
+
 	</interceptors>
 </beans:beans>

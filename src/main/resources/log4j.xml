@@ -13,6 +13,22 @@
 
 	<!-- Ibatis -->
 
+	<logger name="com.ibatis">
+		<level value="debug" />
+	</logger>
+
+	<logger name="com.ibatis.common.jdbc.SimpleDataSource">
+		<level value="debug" />
+	</logger>
+
+	<logger name="com.ibatis.common.jdbc.ScriptRunner">
+		<level value="debug" />
+	</logger>
+
+	<logger name="com.ibatis.common.jdbc.SqlMapClientDelegate">
+		<level value="debug" />
+	</logger>
+
 	<logger name="java.sql.Connection">
 		<level value="debug" />
 	</logger>
@@ -28,8 +44,8 @@
 	<logger name="java.sql.ResultSet">
 		<level value="debug" />
 	</logger>
-	
-	
+
+
 	<!-- Application Loggers -->
 	<logger name="com.dandelion.memberapp">
 		<level value="info" />

@@ -25,5 +25,6 @@
 		<table tableName="tb_feed" domainObjectName="Feed"></table>
 		<table tableName="tb_member" domainObjectName="Member"></table>
 		<table tableName="tb_merchant" domainObjectName="Merchant"></table>
+		<table tableName="tb_notification" domainObjectName="Notification"></table>
 	</context>
 </generatorConfiguration>

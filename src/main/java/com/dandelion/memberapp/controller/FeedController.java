@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.interceptors.UserAuthentication;
-import com.dandelion.memberapp.model.po.Feed;
+import com.dandelion.memberapp.model.bo.FeedInfo;
 import com.dandelion.memberapp.model.po.User;
-import com.dandelion.memberapp.model.vo.FeedInfo;
-import com.dandelion.memberapp.model.vo.FeedList;
+import com.dandelion.memberapp.model.vo.FeedListResponse;
 import com.dandelion.memberapp.model.vo.ResponseResult;
 import com.dandelion.memberapp.service.FeedService;
 
@@ -43,8 +42,8 @@ public class FeedController {
 		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}		
 	
-	@RequestMapping(value = "/Accounts/{id}/Timeline", method = RequestMethod.GET) 
-	public ResponseEntity<FeedList> getTimeline(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
+	@RequestMapping(value = "/Timeline/Accounts/{id}", method = RequestMethod.GET) 
+	public ResponseEntity<FeedListResponse> getTimeline(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
 		User user = userAuthentication.getCurrentUser();
 		JSONObject requestJson = new JSONObject(j);
 		Long sinceId = requestJson.optLong("sinceId");
@@ -52,20 +51,7 @@ public class FeedController {
 		Long limitCount = requestJson.optLong("limitCount");
 		
 		List<FeedInfo> feedInfoList = new ArrayList<FeedInfo>();
-		List<Feed> feeds = feedService.getTimeline(user.getId(), sinceId, maxId, limitCount);
-		
-		for (Feed feed : feeds) {
-			FeedInfo feedinfo = new FeedInfo();
-			feedinfo.setId(feed.getId());
-			feedinfo.setTitle(feed.getTitle());
-			feedinfo.setUserId(feed.getUseridfk());
-			feedinfo.setImageURL(feed.getImageurl());
-			feedinfo.setDate(feed.getCreateddate().getTime());
-			feedinfo.setContent(feed.getContent());
-			feedInfoList.add(feedinfo);
-		}
-		FeedList list = new FeedList();
-		list.setList(feedInfoList);
-		return new ResponseEntity<FeedList>(list, HttpStatus.OK);
+		FeedListResponse feedListResponse = feedService.getTimeline(user.getId(), sinceId, maxId, limitCount);
+		return new ResponseEntity<FeedListResponse>(feedListResponse, HttpStatus.OK);
 	}
 }

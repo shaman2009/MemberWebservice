@@ -19,6 +19,8 @@
 		<result column="ArticleCount" jdbcType="INTEGER" property="articlecount" />
 		<result column="RegisterFrom" jdbcType="INTEGER" property="registerfrom" />
 		<result column="AccountType" jdbcType="INTEGER" property="accounttype" />
+		<result column="merchantIDFK" jdbcType="BIGINT" property="merchantidfk" />
+		<result column="memberIDFK" jdbcType="BIGINT" property="memberidfk" />
 	</resultMap>
 	<resultMap id="FriendBaseResultMap" type="com.dandelion.memberapp.model.po.Friend">
 		<id column="ID" property="id" jdbcType="BIGINT" />
