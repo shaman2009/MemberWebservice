@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +32,7 @@ import com.dandelion.memberapp.model.po.Merchant;
 import com.dandelion.memberapp.model.po.MerchantExample;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
+import com.dandelion.memberapp.model.vo.MerchantInfoResponse;
 import com.dandelion.memberapp.util.Base64;
 import com.dandelion.memberapp.util.ByteUtilities;
 import com.dandelion.memberapp.util.MailUtil;
@@ -159,6 +161,23 @@ public class AccountService {
 		key = "%" + key + "%";
 		List<User> users = accountMapper.searchUser(key);
 		return users;
+	}
+	
+	public List<MerchantInfoResponse> searchMerchant(String key) {
+		key = "%" + key + "%";
+		List<MerchantInfoResponse> merchantInfoResponseList = new ArrayList<MerchantInfoResponse>();
+		MerchantExample merchantExample = new MerchantExample();
+		merchantExample.createCriteria().andNameLike(key);
+		List<Merchant> merchantList = merchantMapper.selectByExample(merchantExample);
+		for (Merchant merchant : merchantList) {
+			MerchantInfoResponse merchantInfoResponse = new MerchantInfoResponse();
+			
+			
+			
+		}
+		
+		
+		return null;
 	}
 	public Emailbean getForgetPasswordToken(final String email) throws MemberAppException {
 		if (!Utilities.checkEmailFormat(email)) {

@@ -242,5 +242,44 @@ public class AccountController {
 	}
 	
 	
+	// Merchant 
+	@RequestMapping(value = "/Merchants", method = RequestMethod.GET)
+	public ResponseEntity<UserList> getMerchants(@RequestParam(value = "j", required = true) String j) throws MemberAppException, JSONException {
+		JSONObject requestJson = new JSONObject(j);
+		String key = requestJson.getString("key");
+		List<UserInfo> userInfos = new ArrayList<UserInfo>();
+		List<User> users = accountService.searchUser(key);
+		for (User user : users) {
+			UserInfo info = new UserInfo();
+			info.setId(user.getId());
+			info.setAlias(user.getAlias());
+			info.setAccounttype(user.getAccounttype());
+			userInfos.add(info);
+		}
+		UserList userList = new UserList();
+		userList.setUsers(userInfos);
+		return new ResponseEntity<UserList>(userList, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/Merchants/{id}", method = RequestMethod.GET)
+	public ResponseEntity<UserInfo> getMerchant(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
+		User self = userAuthentication.getCurrentUser();
+		User user = accountService.getUserInfo(id);
+		
+		
+		
+		
+		
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
