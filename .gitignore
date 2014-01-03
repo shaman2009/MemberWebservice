@@ -5,3 +5,11 @@
 *.war
 *.ear
 /target
+
+
+
+#AS
+.gradle/*
+.idea/*
+build/*
+*.iml
