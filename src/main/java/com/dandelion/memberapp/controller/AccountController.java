@@ -25,10 +25,14 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.interceptors.UserAuthentication;
+import com.dandelion.memberapp.model.po.Member;
+import com.dandelion.memberapp.model.po.Merchant;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.model.vo.FriendsInfo;
 import com.dandelion.memberapp.model.vo.LoginInfo;
+import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.model.vo.ResponseResult;
 import com.dandelion.memberapp.model.vo.UserInfo;
 import com.dandelion.memberapp.model.vo.UserList;
@@ -242,5 +246,100 @@ public class AccountController {
 	}
 	
 	
+	// Merchant 
+	@RequestMapping(value = "/Merchants", method = RequestMethod.GET)
+	public ResponseEntity<MerchantInfoListResponse> searchMerchant(@RequestParam(value = "j", required = true) String j) throws MemberAppException, JSONException {
+		JSONObject requestJson = new JSONObject(j);
+		String key = requestJson.optString("key");
+		Long merchantId = requestJson.optLong("merchantId");
+		MerchantInfoListResponse merchantInfoListResponse = accountService.searchMerchant(key, merchantId);
+		return new ResponseEntity<MerchantInfoListResponse>(merchantInfoListResponse, HttpStatus.OK);
+	}
+	@RequestMapping(value = "/Merchants/{id}", method = RequestMethod.GET)
+	public ResponseEntity<MerchantDetailInfoResponse> getMerchant(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
+		return new ResponseEntity<MerchantDetailInfoResponse>(accountService.getMerchant(id), HttpStatus.OK);
+	}
+	@RequestMapping(value = "/Merchants/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<String> updateMerchant(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
+		JSONObject requestJson = new JSONObject(j);
+		String avatarUrl = requestJson.optString("avatarUrl");
+		String name = requestJson.optString("name");
+		String address = requestJson.optString("address");
+		String phone = requestJson.optString("phone");
+		String email = requestJson.optString("email");
+		String merchantType = requestJson.optString("merchantType");
+		String introduction = requestJson.optString("introduction");
+		boolean nameRequired = requestJson.optBoolean("nameRequired");
+		boolean sexRequired = requestJson.optBoolean("sexRequired");
+		boolean phoneRequired = requestJson.optBoolean("phoneRequired");
+		boolean addressRequired = requestJson.optBoolean("addressRequired");
+		boolean emailRequired = requestJson.optBoolean("emailRequired");
+		boolean memberSetting = requestJson.optBoolean("memberSetting");
+		boolean birthdayRequired = requestJson.optBoolean("birthdayRequired");
+		int amountRequired = requestJson.optInt("amountRequired");
+		int amountCountRequired = requestJson.optInt("amountCountRequired");
+		boolean scorePlan = requestJson.optBoolean("scorePlan");
+		String backgroundurl = requestJson.optString("backgroundurl");
+		
+		Date d = new Date();
+		Merchant merchant = new Merchant();
+		merchant.setAvatarurl(avatarUrl);
+		merchant.setName(name);
+		merchant.setAddress(address);
+		merchant.setPhone(phone);
+		merchant.setEmail(email);
+		merchant.setMerchanttype(merchantType);
+		merchant.setIntroduction(introduction);
+		merchant.setNamerequired(nameRequired);
+		merchant.setSexrequired(sexRequired);
+		merchant.setPhonerequired(phoneRequired);
+		merchant.setAddressrequired(addressRequired);
+		merchant.setEmailrequired(emailRequired);
+		merchant.setBirthdayrequired(birthdayRequired);
+		merchant.setMembersetting(memberSetting);
+		merchant.setAmountrequired(amountRequired);
+		merchant.setAmountcountrequired(amountCountRequired);
+		merchant.setScoreplan(scorePlan);
+		merchant.setModifieddate(d);
+		merchant.setBackgroundurl(backgroundurl);
+		accountService.updateMerchant(merchant, id);
+		return new ResponseEntity<String>(HttpStatus.OK);
+	}
+	
+	// Member
+	@RequestMapping(value = "/Members/{id}", method = RequestMethod.GET)
+	public ResponseEntity<Member> getMember(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
+		return new ResponseEntity<Member>(accountService.getMember(id), HttpStatus.OK);
+	}
+	@RequestMapping(value = "/Members/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<Member> updateMember(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
+		JSONObject requestJson = new JSONObject(j);
+		String avatarUrl = requestJson.optString("avatarUrl");
+		String backgroundUrl = requestJson.optString("backgroundUrl");
+		String name = requestJson.optString("name");
+		int sex = requestJson.optInt("sex");
+		//性别 0代表 男 1 代表女 
+		long birthday = requestJson.optLong("birthday");
+		String address = requestJson.optString("address");
+		String phone = requestJson.optString("phone");
+		String introduction = requestJson.optString("introduction");
+		Date d = new Date();
+		Member member = new Member();
+		member.setAvatarurl(avatarUrl);
+		member.setBackgroundurl(backgroundUrl);
+		member.setName(name);
+		member.setSex(sex);
+		member.setBirthday(new Date(birthday));
+		member.setAddress(address);
+		member.setPhone(phone);
+		member.setIntroduction(introduction);
+		member.setCreateddate(d);
+		member.setModifieddate(d);
+		accountService.updateMember(member, id);
+		return new ResponseEntity<Member>(HttpStatus.OK);
+	}
+	
+	//TODO 
+	// Notification System feed
 	
 }

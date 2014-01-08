@@ -62,4 +62,12 @@ public class WebserviceErrors {
 	
 	public static final int TARGETUSERID_INVALID_CODE = 1040;
 	public static final String TARGETUSERID_INVALID_MESSAGE = "you could not follow yourself";
+	
+	
+	public static final int MERCHANT_NOT_FOUND_CODE = 1051;
+	public static final String MERCHANT_NOT_FOUND_MESSAGE = "merchant not found";
+	
+	public static final int MEMBER_NOT_FOUND_CODE = 1052;
+	public static final String MEMBER_NOT_FOUND_MESSAGE = "member not found";
+	
 }

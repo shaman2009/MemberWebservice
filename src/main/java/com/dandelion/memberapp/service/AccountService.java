@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -15,15 +16,25 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dandelion.memberapp.contants.Contants;
+import com.dandelion.memberapp.contants.MemberContants;
+import com.dandelion.memberapp.contants.NotificationContants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
+import com.dandelion.memberapp.dao.data.MemberMapper;
+import com.dandelion.memberapp.dao.data.MerchantMapper;
+import com.dandelion.memberapp.dao.data.UserMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.Friend;
+import com.dandelion.memberapp.model.po.Member;
+import com.dandelion.memberapp.model.po.MemberExample;
+import com.dandelion.memberapp.model.po.Merchant;
+import com.dandelion.memberapp.model.po.MerchantExample;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
+import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.util.Base64;
 import com.dandelion.memberapp.util.ByteUtilities;
 import com.dandelion.memberapp.util.MailUtil;
@@ -35,6 +46,14 @@ public class AccountService {
 	private AccountMapper accountMapper;
 	@Autowired
 	private WSUserSessionInfoMapper wsUserSessionInfoMapper;
+	@Autowired
+	private MerchantMapper merchantMapper;
+	@Autowired
+	private MemberMapper memberMapper;
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private NotificationService notificationService;
 	
 	//select ID from tb_TestConnection oopass
 	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
@@ -56,7 +75,16 @@ public class AccountService {
 		user.setCreateddate(date);
 		user.setModifieddate(date);
 		user.setAccounttype(accountType);
-		accountMapper.insertUser(user);
+		userMapper.insertSelective(user);
+		user = accountMapper.getUserByEmail(email);
+		Long userId = user.getId();
+		Long idfk = createMerchantOrMemberAccount(userId, accountType, alias, email);
+		if (MemberContants.ACCOUNT_TYPE_MEMBER == accountType) {
+			user.setMemberidfk(idfk);
+		} else {
+			user.setMerchantidfk(idfk);
+		}
+		userMapper.updateByPrimaryKeySelective(user);
 	}
 	public Wsusersession login(String email, String password, String packageName, String identifier) throws MemberAppException {
 
@@ -87,23 +115,29 @@ public class AccountService {
 		wsUserSessionInfoMapper.login(sessionInfo);
 		return sessionInfo;
 	}
-	public int follow(Long fromId, Long targetId) throws MemberAppException {
+	public void follow(Long fromId, Long targetId) throws MemberAppException {
 		if(fromId.equals(targetId)) {
 			throw new MemberAppException(WebserviceErrors.TARGETUSERID_INVALID_CODE,WebserviceErrors.TARGETUSERID_INVALID_MESSAGE); 
 		}
 		List<Friend> friends = accountMapper.selectFriend(fromId, targetId);
 		if(friends.size() > 0) {
-			return 1;
+			return;
 		}
 		Friend friend = new Friend();
 		friend.setFromuseridfk(fromId);
 		friend.setTargetuseridfk(targetId);
 		// follows + 1 followers + 1
-		return accountMapper.follow(friend);
+		accountMapper.follow(friend);
+		User user = userMapper.selectByPrimaryKey(fromId);
+		if (MemberContants.ACCOUNT_TYPE_MEMBER == user.getAccounttype() ) {
+			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_REQUEST);
+		} else {
+			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_ACCEPT);
+		}
 	}
-	public int unfollow(Long fromId, Long targetId) {
+	public void unfollow(Long fromId, Long targetId) {
 		// follows - 1 followers - 1
-		return accountMapper.deleteFriend(fromId, targetId);
+		accountMapper.deleteFriend(fromId, targetId);
 	}
 	public List<User> selectFollowings(Long userId) {
 		List<User> users = accountMapper.selectFollowings(userId);
@@ -137,6 +171,28 @@ public class AccountService {
 		key = "%" + key + "%";
 		List<User> users = accountMapper.searchUser(key);
 		return users;
+	}
+	
+	public MerchantInfoListResponse searchMerchant(String key, Long merchantId) throws MemberAppException {
+		List<Merchant> merchantList = new ArrayList<Merchant>();
+		MerchantInfoListResponse merchantInfoListResponse = new MerchantInfoListResponse();
+		if (merchantId == 0 ) {
+			key = "%" + key + "%";
+			MerchantExample merchantExample = new MerchantExample();
+			merchantExample.createCriteria().andNameLike(key);
+			merchantList = merchantMapper.selectByExample(merchantExample);
+
+		} else {
+			Merchant merchant = merchantMapper.selectByPrimaryKey(merchantId);
+			if (merchant == null) {
+				throw new MemberAppException(
+						WebserviceErrors.MERCHANT_NOT_FOUND_CODE,
+						WebserviceErrors.MERCHANT_NOT_FOUND_MESSAGE);
+			}
+			merchantList.add(merchant);
+		}
+		merchantInfoListResponse.setMerchantList(merchantList);
+		return merchantInfoListResponse;
 	}
 	public Emailbean getForgetPasswordToken(final String email) throws MemberAppException {
 		if (!Utilities.checkEmailFormat(email)) {
@@ -174,12 +230,12 @@ public class AccountService {
 			emailBean = new Emailbean();
 			emailBean.setId(user.getId());
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + MemberContants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
 			accountMapper.insert(emailBean);
 		} else {
 			emailBean.setToken(key);
-			Date d = new Date(System.currentTimeMillis() + Contants.FORGET_PASSWORD_TOKEN_EXPIRE);
+			Date d = new Date(System.currentTimeMillis() + MemberContants.FORGET_PASSWORD_TOKEN_EXPIRE);
 			emailBean.setExpire(d);
 			accountMapper.update(emailBean);
 		}
@@ -228,6 +284,117 @@ public class AccountService {
 		accountMapper.updatePass(user.getId(), password_md5);
 		accountMapper.delete(emailBean.getId());
 
+	}
+	
+	public Long createMerchantOrMemberAccount(Long userId, Integer accountType, String name, String email) {
+		Long id = 0L;
+		Date d = new Date();
+		if (MemberContants.ACCOUNT_TYPE_MEMBER == accountType) {
+			Member member = new Member();
+			member.setUseridfk(userId);
+			member.setName(name);
+			member.setCreateddate(d);
+			member.setModifieddate(d);
+			memberMapper.insertSelective(member);
+			MemberExample memberExample = new MemberExample();
+			memberExample.createCriteria().andUseridfkEqualTo(userId);
+			id = memberMapper.selectByExample(memberExample).get(0).getId();
+		} else if (MemberContants.ACCOUNT_TYPE_MERCHANT == accountType) {
+			Merchant merchant = new Merchant();
+			merchant.setUseridfk(userId);
+			merchant.setName(name);
+			merchant.setEmail(email);
+			merchant.setCreateddate(d);
+			merchant.setModifieddate(d);
+			merchantMapper.insertSelective(merchant);
+			MerchantExample merchantExample = new MerchantExample();
+			merchantExample.createCriteria().andUseridfkEqualTo(userId);
+			id = merchantMapper.selectByExample(merchantExample).get(0).getId();
+		}
+		return id;
+	}
+	public MerchantDetailInfoResponse getMerchant(Long userId) throws MemberAppException {
+		MerchantDetailInfoResponse merchantDetailInfo = new MerchantDetailInfoResponse();
+		MerchantExample example = new MerchantExample();
+		example.createCriteria().andUseridfkEqualTo(userId);
+		List<Merchant> merchantList = merchantMapper.selectByExample(example);
+		if (merchantList.isEmpty()) {
+			throw new MemberAppException(
+					WebserviceErrors.MERCHANT_NOT_FOUND_CODE,
+					WebserviceErrors.MERCHANT_NOT_FOUND_MESSAGE);
+		}
+		Merchant merchant = merchantList.get(0);
+
+		merchantDetailInfo.setAvatarurl(merchant.getAvatarurl());
+		merchantDetailInfo.setName(merchant.getName());
+		merchantDetailInfo.setAddress(merchant.getAddress());
+		merchantDetailInfo.setPhone(merchant.getPhone());
+		merchantDetailInfo.setEmail(merchant.getEmail());
+		merchantDetailInfo.setMerchanttype(merchant.getMerchanttype());
+		merchantDetailInfo.setIntroduction(merchant.getIntroduction());
+		merchantDetailInfo.setNamerequired(merchant.getNamerequired());
+		merchantDetailInfo.setSexrequired(merchant.getSexrequired());
+		merchantDetailInfo.setPhonerequired(merchant.getPhonerequired());
+		merchantDetailInfo.setAddressrequired(merchant.getAddressrequired());
+		merchantDetailInfo.setEmailrequired(merchant.getEmailrequired());
+		merchantDetailInfo.setBirthdayrequired(merchant.getBirthdayrequired());
+		merchantDetailInfo.setMembersetting(merchant.getMembersetting());
+		merchantDetailInfo.setAmountrequired(merchant.getAmountrequired());
+		merchantDetailInfo.setAmountcountrequired(merchant.getAmountcountrequired());
+		merchantDetailInfo.setScoreplan(merchant.getScoreplan());
+		merchantDetailInfo.setBackgroundurl(merchant.getBackgroundurl());
+		merchantDetailInfo.setMerchantId(merchant.getId());
+		
+		User user = userMapper.selectByPrimaryKey(merchant.getUseridfk());
+		if (null == user ) {
+			throw new MemberAppException(
+					WebserviceErrors.USER_NOT_FOUND_CODE,
+					WebserviceErrors.USER_NOT_FOUND_MESSAGE);
+		}
+		merchantDetailInfo.setUserId(user.getId());
+		merchantDetailInfo.setUseremail(user.getUseremail());
+		merchantDetailInfo.setFriendcount(user.getFriendcount());
+		merchantDetailInfo.setFancount(user.getFancount());
+		merchantDetailInfo.setFollowcount(user.getFollowcount());
+		merchantDetailInfo.setArticlecount(user.getArticlecount());
+		return merchantDetailInfo;
+	}
+	public void updateMerchant(Merchant merchant, Long userId) throws MemberAppException {
+		MerchantExample example = new MerchantExample();
+		example.createCriteria().andUseridfkEqualTo(userId);
+		List<Merchant> merchantList = merchantMapper.selectByExample(example);
+		if (merchantList.isEmpty()) {
+			throw new MemberAppException(
+					WebserviceErrors.MERCHANT_NOT_FOUND_CODE,
+					WebserviceErrors.MERCHANT_NOT_FOUND_MESSAGE);
+		}
+		Long merchantId = merchantList.get(0).getId();
+		merchant.setId(merchantId);
+		merchantMapper.updateByPrimaryKeySelective(merchant);
+	}
+	public Member getMember(Long userId) throws MemberAppException {
+		MemberExample example = new MemberExample();
+		example.createCriteria().andUseridfkEqualTo(userId);
+		List<Member> memberList = memberMapper.selectByExample(example);
+		if (memberList.isEmpty()) {
+			throw new MemberAppException(
+					WebserviceErrors.MEMBER_NOT_FOUND_CODE,
+					WebserviceErrors.MEMBER_NOT_FOUND_MESSAGE);
+		}
+		return memberList.get(0);
+	}
+	public void updateMember(Member member, Long userId) throws MemberAppException {
+		MemberExample example = new MemberExample();
+		example.createCriteria().andUseridfkEqualTo(userId);
+		List<Member> memberList = memberMapper.selectByExample(example); 
+		if (memberList.isEmpty()) {
+			throw new MemberAppException(
+					WebserviceErrors.MEMBER_NOT_FOUND_CODE,
+					WebserviceErrors.MEMBER_NOT_FOUND_MESSAGE);
+		}
+		Long memberId = memberList.get(0).getId();
+		member.setId(memberId);
+		memberMapper.updateByPrimaryKeySelective(member);
 	}
 
 }

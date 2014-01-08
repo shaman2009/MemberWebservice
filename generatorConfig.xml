@@ -4,7 +4,7 @@
 	<!-- <classPathEntry location="/Users/ouroc/.m2/repository/org/mybatis/mybatis/3.0.5/mybatis-3.0.5-sources.jar" 
 		/> -->
 
-	<classPathEntry location="C:\Users\fengxiang\.m2\repository\mysql\mysql-connector-java\5.1.17\mysql-connector-java-5.1.17.jar" />
+	<classPathEntry location="C:\Users\fengxiangzhu\.m2\repository\mysql\mysql-connector-java\5.1.17\mysql-connector-java-5.1.17.jar" />
 	<context id="context1">
 		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
 			connectionURL="jdbc:mysql://localhost:3306/memberapp" userId="fengxiang"
@@ -25,5 +25,6 @@
 		<table tableName="tb_feed" domainObjectName="Feed"></table>
 		<table tableName="tb_member" domainObjectName="Member"></table>
 		<table tableName="tb_merchant" domainObjectName="Merchant"></table>
+		<table tableName="tb_notification" domainObjectName="Notification"></table>
 	</context>
 </generatorConfiguration>

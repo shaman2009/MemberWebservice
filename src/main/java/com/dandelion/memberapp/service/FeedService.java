@@ -1,5 +1,6 @@
 package com.dandelion.memberapp.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -7,12 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dandelion.memberapp.dao.data.TimelineMapper;
+import com.dandelion.memberapp.exception.MemberAppException;
+import com.dandelion.memberapp.model.bo.FeedInfo;
 import com.dandelion.memberapp.model.po.Feed;
+import com.dandelion.memberapp.model.vo.FeedListResponse;
+import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
 
 @Service
 public class FeedService {
 	@Autowired
 	private TimelineMapper timelineMapper;
+	@Autowired
+	private AccountService accountService;
 	
 	public int publishFeed(Long userId, String content, String imageURL, String title) {
 		Feed feed = new Feed();
@@ -24,7 +31,7 @@ public class FeedService {
 		feed.setModifieddate(new Date());
 		return timelineMapper.insertFeed(feed);
 	}
-	public List<Feed> getTimeline(Long userId, Long sinceId, Long maxId, Long limitCount) {
+	public FeedListResponse getTimeline(Long userId, Long sinceId, Long maxId, Long limitCount) throws MemberAppException {
 		if(sinceId == null || sinceId.equals(0L)) {
 			sinceId = 1L;
 		}
@@ -34,7 +41,23 @@ public class FeedService {
 		if(limitCount == null || limitCount.equals(0L)) {
 			limitCount = 30L;
 		}
+		FeedListResponse feedListResponse = new FeedListResponse();
+		List<FeedInfo> feedInfoList = new ArrayList<FeedInfo>();
 		List<Feed> feeds = timelineMapper.getTimeline(userId, sinceId, maxId, limitCount);
-		return feeds;
+		for (Feed feed : feeds) {
+			long id = feed.getUseridfk();
+			FeedInfo feedinfo = new FeedInfo();
+			feedinfo.setId(feed.getId());
+			feedinfo.setTitle(feed.getTitle());
+			feedinfo.setUserId(id);
+			feedinfo.setImageURL(feed.getImageurl());
+			feedinfo.setDate(feed.getCreateddate().getTime());
+			feedinfo.setContent(feed.getContent());
+			MerchantDetailInfoResponse merchantDetailInfoResponse = accountService.getMerchant(id);
+			feedinfo.setMerchantDetailInfoResponse(merchantDetailInfoResponse);
+			feedInfoList.add(feedinfo);
+		}
+		feedListResponse.setFeedList(feedInfoList);
+		return feedListResponse;
 	}
 }
