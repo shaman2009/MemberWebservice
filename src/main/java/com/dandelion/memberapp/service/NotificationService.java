@@ -36,6 +36,10 @@ public class NotificationService {
 		List<Notification> notificationList = notificationMapper.selectByExample(example);
 		NotificationListResponse notificationListResponse = new NotificationListResponse();
 		notificationListResponse.setNotificationList(notificationList);
+		
+		
+		
+		
 		return notificationListResponse;
 	}
 
