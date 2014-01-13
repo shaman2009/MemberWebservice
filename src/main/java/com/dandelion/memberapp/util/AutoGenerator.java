@@ -2,8 +2,8 @@ package com.dandelion.memberapp.util;
 
 import java.lang.reflect.Field;
 
-import com.dandelion.memberapp.model.bo.FeedInfo;
-import com.dandelion.memberapp.model.po.Feed;
+import com.dandelion.memberapp.model.bo.NotificationInfo;
+import com.dandelion.memberapp.model.po.Notification;
 
 public class AutoGenerator {
 	/**
@@ -292,6 +292,6 @@ public class AutoGenerator {
 		// System.out.println(new ClassAttributesAssignment().assignLeft(a, b));
 		// System.out.println(new ClassAttributesAssignment().assignLeft(b, a));
 //		System.out.println(new AutoGenerator().printSetter( new Member()));
-		System.out.println(new AutoGenerator().printGetterSetter(new FeedInfo(), new Feed()));
+		System.out.println(new AutoGenerator().printGetterSetter(new NotificationInfo(), new Notification()));
 	}
 }

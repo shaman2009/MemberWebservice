@@ -149,7 +149,7 @@ public class AccountTest {
 	public void followTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
-		String loginResponse = loginAndRegister(email, password);
+		String loginResponse = memberLoginAndRegister(email, password);
 		String targetemail = UUID.randomUUID().toString() + "@junit.com";
 		String targetpassword = UUID.randomUUID().toString();
 		String targetLoginResponse = loginAndRegister(targetemail, targetpassword);
@@ -171,7 +171,20 @@ public class AccountTest {
 				.andDo(print())
 				.andExpect(status().isOk());
 		followRequestParams.put("sid", targetSid);
+		this.mockMvc.perform(put(FRIENDURL + "/" + userId)
+				.param("j", followRequestParams.toString()))
+				.andDo(print())
+				.andExpect(status().isOk());
 		this.mockMvc.perform(get(FRIENDURL + "/" + targetUserId)
+				.param("j", followRequestParams.toString()))
+				.andDo(print())
+				.andExpect(status().isOk());
+		this.mockMvc.perform(get("/MyMembers")
+				.param("j", followRequestParams.toString()))
+				.andDo(print())
+				.andExpect(status().isOk());
+		followRequestParams.put("sid", sid);
+		this.mockMvc.perform(get("/MyMerchants")
 				.param("j", followRequestParams.toString()))
 				.andDo(print())
 				.andExpect(status().isOk());
@@ -457,7 +470,7 @@ public class AccountTest {
 	public void getNotificationsTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
-		String loginResponse = loginAndRegister(email, password);
+		String loginResponse = memberLoginAndRegister(email, password);
 		String targetemail = UUID.randomUUID().toString() + "@junit.com";
 		String targetpassword = UUID.randomUUID().toString();
 		String targetLoginResponse = loginAndRegister(targetemail, targetpassword);

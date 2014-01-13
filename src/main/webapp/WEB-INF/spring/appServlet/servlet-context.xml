@@ -95,7 +95,9 @@
 			<mapping path="/Merchants/**" />
 			<mapping path="/Notifications" />
 			<mapping path="/Notifications/**" />
-			<mapping path="//Timeline/**" />
+			<mapping path="/Timeline/**" />
+			<mapping path="/MyMembers" />
+			<mapping path="/MyMerchants" />
 			<beans:bean
 				class="com.dandelion.memberapp.interceptors.AuthorizedSignatureValidationInterceptor">
 			</beans:bean>

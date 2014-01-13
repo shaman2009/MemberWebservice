@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dandelion.memberapp.contants.MemberContants;
 import com.dandelion.memberapp.contants.NotificationContants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
+import com.dandelion.memberapp.dao.data.FriendMapper;
 import com.dandelion.memberapp.dao.data.MemberMapper;
 import com.dandelion.memberapp.dao.data.MerchantMapper;
 import com.dandelion.memberapp.dao.data.UserMapper;
@@ -27,13 +28,16 @@ import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.Friend;
+import com.dandelion.memberapp.model.po.FriendExample;
 import com.dandelion.memberapp.model.po.Member;
 import com.dandelion.memberapp.model.po.MemberExample;
 import com.dandelion.memberapp.model.po.Merchant;
 import com.dandelion.memberapp.model.po.MerchantExample;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
+import com.dandelion.memberapp.model.vo.MemberListResponse;
 import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantDetailListResponse;
 import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.util.Base64;
 import com.dandelion.memberapp.util.ByteUtilities;
@@ -54,6 +58,8 @@ public class AccountService {
 	private UserMapper userMapper;
 	@Autowired
 	private NotificationService notificationService;
+	@Autowired
+	private FriendMapper friendMapper;
 	
 	//select ID from tb_TestConnection oopass
 	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
@@ -144,6 +150,8 @@ public class AccountService {
 		// follows - 1 followers - 1
 		return users;
 	}
+	// return ID is tb_friend ID  , it is wrong.
+	@Deprecated
 	public List<User> selectFollowers(Long userId) {
 		List<User> users = accountMapper.selectFollowers(userId);
 		// follows - 1 followers - 1
@@ -395,6 +403,34 @@ public class AccountService {
 		Long memberId = memberList.get(0).getId();
 		member.setId(memberId);
 		memberMapper.updateByPrimaryKeySelective(member);
+	}
+	public MemberListResponse getMyMembers(Long id) throws MemberAppException {
+		MemberListResponse memberListResponse = new MemberListResponse();
+		List<Member> memberList = new ArrayList<Member>();
+		FriendExample friendExample = new FriendExample();
+		friendExample.createCriteria().andTargetuseridfkEqualTo(id);
+		List<Friend> friends = friendMapper.selectByExample(friendExample);
+		for (Friend friend : friends) {
+			long userId = friend.getFromuseridfk();
+			Member member = getMember(userId);
+			memberList.add(member);
+		}
+		memberListResponse.setMemberList(memberList);
+		return memberListResponse;
+	}
+	public MerchantDetailListResponse getMyMerchants(Long id) throws MemberAppException {
+		MerchantDetailListResponse merchantDetailListResponse = new MerchantDetailListResponse();
+		List<MerchantDetailInfoResponse> merchantList = new ArrayList<MerchantDetailInfoResponse>();
+		FriendExample friendExample = new FriendExample();
+		friendExample.createCriteria().andFromuseridfkEqualTo(id);
+		List<Friend> friends = friendMapper.selectByExample(friendExample);
+		for (Friend friend : friends) {
+			long userId = friend.getTargetuseridfk();
+			MerchantDetailInfoResponse merchantDetailInfoResponse = getMerchant(userId);
+			merchantList.add(merchantDetailInfoResponse);
+		}
+		merchantDetailListResponse.setMerchantList(merchantList);
+		return merchantDetailListResponse;
 	}
 
 }

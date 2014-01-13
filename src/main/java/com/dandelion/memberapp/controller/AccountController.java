@@ -31,7 +31,9 @@ import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.model.vo.FriendsInfo;
 import com.dandelion.memberapp.model.vo.LoginInfo;
+import com.dandelion.memberapp.model.vo.MemberListResponse;
 import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantDetailListResponse;
 import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.model.vo.ResponseResult;
 import com.dandelion.memberapp.model.vo.UserInfo;
@@ -190,6 +192,21 @@ public class AccountController {
 		friendsInfo.setVoFollowers(voFollowers);
 		friendsInfo.setVoFollowings(voFollowings);
 		return new ResponseEntity<FriendsInfo>(friendsInfo, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/MyMembers", method = RequestMethod.GET) 
+	public ResponseEntity<MemberListResponse> getMyMembers(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
+		User self = userAuthentication.getCurrentUser();
+		MemberListResponse memberListResponse = accountService.getMyMembers(self.getId());
+		return new ResponseEntity<MemberListResponse>(memberListResponse, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/MyMerchants", method = RequestMethod.GET) 
+	public ResponseEntity<MerchantDetailListResponse> getMyMerchants(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
+		User self = userAuthentication.getCurrentUser();
+		MerchantDetailListResponse merchantDetailListResponse = accountService.getMyMerchants(self.getId());
+		return new ResponseEntity<MerchantDetailListResponse>(merchantDetailListResponse, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/ForgetPassword", method = RequestMethod.POST)
