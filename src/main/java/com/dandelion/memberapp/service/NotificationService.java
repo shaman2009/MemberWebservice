@@ -34,7 +34,7 @@ public class NotificationService {
 
 	public NotificationListResponse getNotifications(Long userId) {
 		NotificationExample example = new NotificationExample();
-		example.createCriteria().andTouseridfkEqualTo(userId).andIsdeletedEqualTo(false).andIsreadEqualTo(false);
+		example.createCriteria().andTouseridfkEqualTo(userId).andIsdeletedEqualTo(false);
 		List<NotificationInfo> notificationInfoList = new ArrayList<NotificationInfo>();
 		List<Notification> notificationList = notificationMapper.selectByExample(example);
 		for (Notification notification : notificationList) {

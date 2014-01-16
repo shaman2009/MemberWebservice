@@ -26,6 +26,8 @@ import com.dandelion.memberapp.dao.data.UserMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
+import com.dandelion.memberapp.model.bo.MemberInfo;
+import com.dandelion.memberapp.model.bo.MerchantMemberInfo;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.Friend;
 import com.dandelion.memberapp.model.po.FriendExample;
@@ -138,6 +140,18 @@ public class AccountService {
 		if (MemberContants.ACCOUNT_TYPE_MEMBER == user.getAccounttype() ) {
 			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_REQUEST);
 		} else {
+			// update ismember == true
+			FriendExample friendExample = new FriendExample();
+			friendExample.createCriteria().andFromuseridfkEqualTo(targetId).andTargetuseridfkEqualTo(fromId);
+			List<Friend> list = friendMapper.selectByExample(friendExample);
+			if (list.isEmpty()) {
+				throw new MemberAppException(
+						WebserviceErrors.LIST_EMPTY_ERROR_CODE,
+						WebserviceErrors.LIST_EMPTY_ERROR_MESSAGE); 
+			}
+			Friend friendx = list.get(0);
+			friendx.setIsmember(true);
+			friendMapper.updateByPrimaryKeySelective(friendx);
 			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_ACCEPT);
 		}
 	}
@@ -406,31 +420,86 @@ public class AccountService {
 	}
 	public MemberListResponse getMyMembers(Long id) throws MemberAppException {
 		MemberListResponse memberListResponse = new MemberListResponse();
-		List<Member> memberList = new ArrayList<Member>();
+		List<MemberInfo> memberList = new ArrayList<MemberInfo>();
 		FriendExample friendExample = new FriendExample();
 		friendExample.createCriteria().andTargetuseridfkEqualTo(id);
 		List<Friend> friends = friendMapper.selectByExample(friendExample);
+		
 		for (Friend friend : friends) {
 			long userId = friend.getFromuseridfk();
 			Member member = getMember(userId);
-			memberList.add(member);
+			MemberInfo memberInfo = new MemberInfo();
+			memberInfo.setId(member.getId());
+			memberInfo.setUseridfk(member.getUseridfk());
+			memberInfo.setAvatarurl(member.getAvatarurl());
+			memberInfo.setBackgroundurl(member.getBackgroundurl());
+			memberInfo.setName(member.getName());
+			memberInfo.setSex(member.getSex());
+			memberInfo.setBirthday(member.getBirthday());
+			memberInfo.setAddress(member.getAddress());
+			memberInfo.setPhone(member.getPhone());
+			memberInfo.setIntroduction(member.getIntroduction());
+			memberInfo.setCreateddate(member.getCreateddate());
+			memberInfo.setModifieddate(member.getModifieddate());
+			
+
+			
+			memberInfo.setFriendId(friend.getId());
+			memberInfo.setIsmember(friend.getIsmember());
+			memberInfo.setAmount(friend.getAmount());
+			memberInfo.setAmountcount(friend.getAmountcount());
+			memberInfo.setScore(friend.getScore());
+			memberList.add(memberInfo);
 		}
 		memberListResponse.setMemberList(memberList);
 		return memberListResponse;
 	}
 	public MerchantDetailListResponse getMyMerchants(Long id) throws MemberAppException {
 		MerchantDetailListResponse merchantDetailListResponse = new MerchantDetailListResponse();
-		List<MerchantDetailInfoResponse> merchantList = new ArrayList<MerchantDetailInfoResponse>();
+		List<MerchantMemberInfo> merchantList = new ArrayList<MerchantMemberInfo>();
 		FriendExample friendExample = new FriendExample();
 		friendExample.createCriteria().andFromuseridfkEqualTo(id);
 		List<Friend> friends = friendMapper.selectByExample(friendExample);
 		for (Friend friend : friends) {
 			long userId = friend.getTargetuseridfk();
 			MerchantDetailInfoResponse merchantDetailInfoResponse = getMerchant(userId);
-			merchantList.add(merchantDetailInfoResponse);
+			merchantDetailInfoResponse.setBackgroundurl(friend.getId().toString());
+			MerchantMemberInfo merchantMemberInfo = new MerchantMemberInfo();
+			
+			merchantMemberInfo.setMerchantId(merchantDetailInfoResponse.getMerchantId());
+			merchantMemberInfo.setAvatarurl(merchantDetailInfoResponse.getAvatarurl());
+			merchantMemberInfo.setName(merchantDetailInfoResponse.getName());
+			merchantMemberInfo.setAddress(merchantDetailInfoResponse.getAddress());
+			merchantMemberInfo.setPhone(merchantDetailInfoResponse.getPhone());
+			merchantMemberInfo.setEmail(merchantDetailInfoResponse.getEmail());
+			merchantMemberInfo.setMerchanttype(merchantDetailInfoResponse.getMerchanttype());
+			merchantMemberInfo.setIntroduction(merchantDetailInfoResponse.getIntroduction());
+			merchantMemberInfo.setNamerequired(merchantDetailInfoResponse.getNamerequired());
+			merchantMemberInfo.setSexrequired(merchantDetailInfoResponse.getSexrequired());
+			merchantMemberInfo.setPhonerequired(merchantDetailInfoResponse.getPhonerequired());
+			merchantMemberInfo.setAddressrequired(merchantDetailInfoResponse.getAddressrequired());
+			merchantMemberInfo.setEmailrequired(merchantDetailInfoResponse.getEmailrequired());
+			merchantMemberInfo.setBirthdayrequired(merchantDetailInfoResponse.getBirthdayrequired());
+			merchantMemberInfo.setMembersetting(merchantDetailInfoResponse.getMembersetting());
+			merchantMemberInfo.setAmountrequired(merchantDetailInfoResponse.getAmountrequired());
+			merchantMemberInfo.setAmountcountrequired(merchantDetailInfoResponse.getAmountcountrequired());
+			merchantMemberInfo.setScoreplan(merchantDetailInfoResponse.getScoreplan());
+			merchantMemberInfo.setBackgroundurl(merchantDetailInfoResponse.getBackgroundurl());
+			
+			//error friend
+			
+			merchantMemberInfo.setFriendId(friend.getId());
+			merchantMemberInfo.setIsmember(friend.getIsmember());
+			merchantMemberInfo.setAmount(friend.getAmount());
+			merchantMemberInfo.setAmountcount(friend.getAmountcount());
+			merchantMemberInfo.setScore(friend.getScore());
+			merchantList.add(merchantMemberInfo);
 		}
 		merchantDetailListResponse.setMerchantList(merchantList);
 		return merchantDetailListResponse;
+	}
+	public void updateMemberInfo(Friend friend) {
+		friendMapper.updateByPrimaryKeySelective(friend);
 	}
 
 }

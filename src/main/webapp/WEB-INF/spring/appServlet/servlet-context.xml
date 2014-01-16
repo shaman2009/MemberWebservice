@@ -98,6 +98,7 @@
 			<mapping path="/Timeline/**" />
 			<mapping path="/MyMembers" />
 			<mapping path="/MyMerchants" />
+			<mapping path="/MyPosts" />
 			<beans:bean
 				class="com.dandelion.memberapp.interceptors.AuthorizedSignatureValidationInterceptor">
 			</beans:bean>
