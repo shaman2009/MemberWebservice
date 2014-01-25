@@ -319,6 +319,10 @@ public class AccountTest {
 				.param("j", getTimelineRequestParams.toString()))
 				.andDo(print())
 				.andExpect(status().isOk());
+		this.mockMvc.perform(get("/MerchantPosts" + "/" + targetUserId)
+				.param("j", getTimelineRequestParams.toString()))
+				.andDo(print())
+				.andExpect(status().isOk());
 		postRequestParams.put("sid", targetSid);
 		this.mockMvc.perform(get("/MyPosts")
 				.param("j", postRequestParams.toString()))

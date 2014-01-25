@@ -21,7 +21,12 @@ public class MerchantDetailInfoResponse {
 	private Integer amountcountrequired;
 	private Boolean scoreplan;
 	private String backgroundurl;
-	
+	private Long userId;
+	private String useremail;
+	private Integer friendcount;
+	private Integer fancount;
+	private Integer followcount;
+	private Integer articlecount;
 	
 	
 	public Long getMerchantId() {
@@ -174,10 +179,5 @@ public class MerchantDetailInfoResponse {
 	public void setArticlecount(Integer articlecount) {
 		this.articlecount = articlecount;
 	}
-	private Long userId;
-	private String useremail;
-	private Integer friendcount;
-	private Integer fancount;
-	private Integer followcount;
-	private Integer articlecount;
+
 }

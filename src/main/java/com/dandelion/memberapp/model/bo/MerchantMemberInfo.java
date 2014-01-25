@@ -31,6 +31,13 @@ public class MerchantMemberInfo {
 	private Long amount;
 	private Long amountcount;
 	private Long score;
+	private Long userId;
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	public Long getMerchantId() {
 		return merchantId;
 	}

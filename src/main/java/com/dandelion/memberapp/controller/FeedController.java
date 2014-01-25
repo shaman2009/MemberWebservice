@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,6 +56,16 @@ public class FeedController {
 		Long maxId = requestJson.optLong("maxId");
 		Long limitCount = requestJson.optLong("limitCount");
 		FeedListResponse feedListResponse = feedService.getMyPosts(user.getId(), sinceId, maxId, limitCount);
+		return new ResponseEntity<FeedListResponse>(feedListResponse, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/MerchantPosts/{id}", method = RequestMethod.GET) 
+	public ResponseEntity<FeedListResponse> getMerchantPosts(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
+		JSONObject requestJson = new JSONObject(j);
+		Long sinceId = requestJson.optLong("sinceId");
+		Long maxId = requestJson.optLong("maxId");
+		Long limitCount = requestJson.optLong("limitCount");
+		FeedListResponse feedListResponse = feedService.getMyPosts(id, sinceId, maxId, limitCount);
 		return new ResponseEntity<FeedListResponse>(feedListResponse, HttpStatus.OK);
 	}
 }

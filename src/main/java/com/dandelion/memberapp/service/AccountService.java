@@ -465,7 +465,7 @@ public class AccountService {
 			MerchantDetailInfoResponse merchantDetailInfoResponse = getMerchant(userId);
 			merchantDetailInfoResponse.setBackgroundurl(friend.getId().toString());
 			MerchantMemberInfo merchantMemberInfo = new MerchantMemberInfo();
-			
+			merchantMemberInfo.setUserId(userId);
 			merchantMemberInfo.setMerchantId(merchantDetailInfoResponse.getMerchantId());
 			merchantMemberInfo.setAvatarurl(merchantDetailInfoResponse.getAvatarurl());
 			merchantMemberInfo.setName(merchantDetailInfoResponse.getName());
@@ -487,7 +487,15 @@ public class AccountService {
 			merchantMemberInfo.setBackgroundurl(merchantDetailInfoResponse.getBackgroundurl());
 			
 			//error friend
-			
+//			FriendExample memberInfoExample  = new FriendExample();
+//			memberInfoExample.createCriteria().andFromuseridfkEqualTo(friend.getTargetuseridfk()).andTargetuseridfkEqualTo(id);
+//			List<Friend> list = friendMapper.selectByExample(memberInfoExample);
+//			if (list.isEmpty()) {
+//				throw new MemberAppException(
+//						WebserviceErrors.LIST_EMPTY_ERROR_CODE,
+//						WebserviceErrors.LIST_EMPTY_ERROR_MESSAGE); 
+//			}
+//			Friend memberInfo = list.get(0);
 			merchantMemberInfo.setFriendId(friend.getId());
 			merchantMemberInfo.setIsmember(friend.getIsmember());
 			merchantMemberInfo.setAmount(friend.getAmount());

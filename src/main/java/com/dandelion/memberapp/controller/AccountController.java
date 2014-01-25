@@ -345,7 +345,12 @@ public class AccountController {
 		accountService.updateMerchant(merchant, id);
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
-	
+	public static void main(String[] args) {
+		String s = "累計積分 : 262";
+        String[] strs = s.split(":");
+        long nowScore = Long.valueOf(strs[1].trim());
+        System.out.println(nowScore);
+	}
 	// Member
 	@RequestMapping(value = "/Members/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Member> getMember(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
