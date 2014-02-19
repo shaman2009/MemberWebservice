@@ -1,11 +1,14 @@
 package com.dandelion.memberapp.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +55,7 @@ public class AccountController {
 	private UserAuthentication userAuthentication;
 	
 	@RequestMapping(value = "/Register", method = RequestMethod.POST)
-	public ResponseEntity<ResponseResult> register(@RequestParam(value = "j", required = true) String j)throws  JSONException, MemberAppException {
+	public ResponseEntity<ResponseResult> register(@RequestParam(value = "j", required = true) String j, HttpServletResponse response)throws  JSONException, IOException, MemberAppException {
 
 		JSONObject json = new JSONObject(j);
 		String email = json.getString("email");

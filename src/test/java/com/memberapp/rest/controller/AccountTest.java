@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,6 +61,26 @@ public class AccountTest {
 					.param("j", registerRequestParams.toString()))
 					.andDo(print())
 					.andExpect(status().isOk());
+	}	
+	
+	@Test
+	public void RegisterDuplicatedTest() throws Exception {
+		String email = UUID.randomUUID().toString() + "@junit.com";
+		String password = UUID.randomUUID().toString();
+		JSONObject registerRequestParams = new JSONObject();
+		registerRequestParams.put("email", email);
+		registerRequestParams.put("password", password);
+		registerRequestParams.put("accountType", 0);
+		registerRequestParams.put("alias", UUID.randomUUID().toString());
+		this.mockMvc.perform(post(REGISTERURL)
+					.param("j", registerRequestParams.toString()))
+					.andDo(print())
+					.andExpect(status().isOk());
+		String errorMessage  = this.mockMvc.perform(post(REGISTERURL)
+				.param("j", registerRequestParams.toString()))
+				.andDo(print())
+				.andExpect(status().is(HttpStatus.SC_INTERNAL_SERVER_ERROR)).andReturn().getResponse().getErrorMessage();
+		System.out.println("ErrorMessage : " + errorMessage);
 	}	
 	
 	@Test
