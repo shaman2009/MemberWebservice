@@ -3,17 +3,17 @@ package com.dandelion.memberapp.model.vo;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dandelion.memberapp.model.po.Notification;
+import com.dandelion.memberapp.model.bo.NotificationInfo;
 
 public class NotificationListResponse {
-	List<Notification> notificationList;
+	List<NotificationInfo> notificationList;
 	public NotificationListResponse() {
-		notificationList = new ArrayList<Notification>();
+		notificationList = new ArrayList<NotificationInfo>();
 	}
-	public List<Notification> getNotificationList() {
+	public List<NotificationInfo> getNotificationList() {
 		return notificationList;
 	}
-	public void setNotificationList(List<Notification> notificationList) {
+	public void setNotificationList(List<NotificationInfo> notificationList) {
 		this.notificationList = notificationList;
 	}
 	

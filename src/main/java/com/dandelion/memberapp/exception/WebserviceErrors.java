@@ -26,6 +26,11 @@ public class WebserviceErrors {
 	public static final int RESULT_NULL_CODE = 611;
 	public static final String RESULT_NULL_MESSAGE = "result is null";
 	
+	
+	public static final int LIST_EMPTY_ERROR_CODE = 1000;
+	public static final String LIST_EMPTY_ERROR_MESSAGE = "query list is empty";
+	
+	
 	public static final int EMAIL_INVALID_CODE = 1001;
 	public static final String EMAIL_INVALID_MESSAGE = "email invalid";
 

@@ -19,21 +19,27 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dandelion.memberapp.contants.MemberContants;
 import com.dandelion.memberapp.contants.NotificationContants;
 import com.dandelion.memberapp.dao.data.AccountMapper;
+import com.dandelion.memberapp.dao.data.FriendMapper;
 import com.dandelion.memberapp.dao.data.MemberMapper;
 import com.dandelion.memberapp.dao.data.MerchantMapper;
 import com.dandelion.memberapp.dao.data.UserMapper;
 import com.dandelion.memberapp.dao.data.WSUserSessionInfoMapper;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
+import com.dandelion.memberapp.model.bo.MemberInfo;
+import com.dandelion.memberapp.model.bo.MerchantMemberInfo;
 import com.dandelion.memberapp.model.po.Emailbean;
 import com.dandelion.memberapp.model.po.Friend;
+import com.dandelion.memberapp.model.po.FriendExample;
 import com.dandelion.memberapp.model.po.Member;
 import com.dandelion.memberapp.model.po.MemberExample;
 import com.dandelion.memberapp.model.po.Merchant;
 import com.dandelion.memberapp.model.po.MerchantExample;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
+import com.dandelion.memberapp.model.vo.MemberListResponse;
 import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantDetailListResponse;
 import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.util.Base64;
 import com.dandelion.memberapp.util.ByteUtilities;
@@ -54,6 +60,8 @@ public class AccountService {
 	private UserMapper userMapper;
 	@Autowired
 	private NotificationService notificationService;
+	@Autowired
+	private FriendMapper friendMapper;
 	
 	//select ID from tb_TestConnection oopass
 	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
@@ -132,6 +140,18 @@ public class AccountService {
 		if (MemberContants.ACCOUNT_TYPE_MEMBER == user.getAccounttype() ) {
 			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_REQUEST);
 		} else {
+			// update ismember == true
+			FriendExample friendExample = new FriendExample();
+			friendExample.createCriteria().andFromuseridfkEqualTo(targetId).andTargetuseridfkEqualTo(fromId);
+			List<Friend> list = friendMapper.selectByExample(friendExample);
+			if (list.isEmpty()) {
+				throw new MemberAppException(
+						WebserviceErrors.LIST_EMPTY_ERROR_CODE,
+						WebserviceErrors.LIST_EMPTY_ERROR_MESSAGE); 
+			}
+			Friend friendx = list.get(0);
+			friendx.setIsmember(true);
+			friendMapper.updateByPrimaryKeySelective(friendx);
 			notificationService.addNotification(fromId, targetId, "", NotificationContants.MEMBER_ACCEPT);
 		}
 	}
@@ -144,6 +164,8 @@ public class AccountService {
 		// follows - 1 followers - 1
 		return users;
 	}
+	// return ID is tb_friend ID  , it is wrong.
+	@Deprecated
 	public List<User> selectFollowers(Long userId) {
 		List<User> users = accountMapper.selectFollowers(userId);
 		// follows - 1 followers - 1
@@ -395,6 +417,97 @@ public class AccountService {
 		Long memberId = memberList.get(0).getId();
 		member.setId(memberId);
 		memberMapper.updateByPrimaryKeySelective(member);
+	}
+	public MemberListResponse getMyMembers(Long id) throws MemberAppException {
+		MemberListResponse memberListResponse = new MemberListResponse();
+		List<MemberInfo> memberList = new ArrayList<MemberInfo>();
+		FriendExample friendExample = new FriendExample();
+		friendExample.createCriteria().andTargetuseridfkEqualTo(id);
+		List<Friend> friends = friendMapper.selectByExample(friendExample);
+		
+		for (Friend friend : friends) {
+			long userId = friend.getFromuseridfk();
+			Member member = getMember(userId);
+			MemberInfo memberInfo = new MemberInfo();
+			memberInfo.setId(member.getId());
+			memberInfo.setUseridfk(member.getUseridfk());
+			memberInfo.setAvatarurl(member.getAvatarurl());
+			memberInfo.setBackgroundurl(member.getBackgroundurl());
+			memberInfo.setName(member.getName());
+			memberInfo.setSex(member.getSex());
+			memberInfo.setBirthday(member.getBirthday());
+			memberInfo.setAddress(member.getAddress());
+			memberInfo.setPhone(member.getPhone());
+			memberInfo.setIntroduction(member.getIntroduction());
+			memberInfo.setCreateddate(member.getCreateddate());
+			memberInfo.setModifieddate(member.getModifieddate());
+			
+
+			
+			memberInfo.setFriendId(friend.getId());
+			memberInfo.setIsmember(friend.getIsmember());
+			memberInfo.setAmount(friend.getAmount());
+			memberInfo.setAmountcount(friend.getAmountcount());
+			memberInfo.setScore(friend.getScore());
+			memberList.add(memberInfo);
+		}
+		memberListResponse.setMemberList(memberList);
+		return memberListResponse;
+	}
+	public MerchantDetailListResponse getMyMerchants(Long id) throws MemberAppException {
+		MerchantDetailListResponse merchantDetailListResponse = new MerchantDetailListResponse();
+		List<MerchantMemberInfo> merchantList = new ArrayList<MerchantMemberInfo>();
+		FriendExample friendExample = new FriendExample();
+		friendExample.createCriteria().andFromuseridfkEqualTo(id);
+		List<Friend> friends = friendMapper.selectByExample(friendExample);
+		for (Friend friend : friends) {
+			long userId = friend.getTargetuseridfk();
+			MerchantDetailInfoResponse merchantDetailInfoResponse = getMerchant(userId);
+			merchantDetailInfoResponse.setBackgroundurl(friend.getId().toString());
+			MerchantMemberInfo merchantMemberInfo = new MerchantMemberInfo();
+			merchantMemberInfo.setUserId(userId);
+			merchantMemberInfo.setMerchantId(merchantDetailInfoResponse.getMerchantId());
+			merchantMemberInfo.setAvatarurl(merchantDetailInfoResponse.getAvatarurl());
+			merchantMemberInfo.setName(merchantDetailInfoResponse.getName());
+			merchantMemberInfo.setAddress(merchantDetailInfoResponse.getAddress());
+			merchantMemberInfo.setPhone(merchantDetailInfoResponse.getPhone());
+			merchantMemberInfo.setEmail(merchantDetailInfoResponse.getEmail());
+			merchantMemberInfo.setMerchanttype(merchantDetailInfoResponse.getMerchanttype());
+			merchantMemberInfo.setIntroduction(merchantDetailInfoResponse.getIntroduction());
+			merchantMemberInfo.setNamerequired(merchantDetailInfoResponse.getNamerequired());
+			merchantMemberInfo.setSexrequired(merchantDetailInfoResponse.getSexrequired());
+			merchantMemberInfo.setPhonerequired(merchantDetailInfoResponse.getPhonerequired());
+			merchantMemberInfo.setAddressrequired(merchantDetailInfoResponse.getAddressrequired());
+			merchantMemberInfo.setEmailrequired(merchantDetailInfoResponse.getEmailrequired());
+			merchantMemberInfo.setBirthdayrequired(merchantDetailInfoResponse.getBirthdayrequired());
+			merchantMemberInfo.setMembersetting(merchantDetailInfoResponse.getMembersetting());
+			merchantMemberInfo.setAmountrequired(merchantDetailInfoResponse.getAmountrequired());
+			merchantMemberInfo.setAmountcountrequired(merchantDetailInfoResponse.getAmountcountrequired());
+			merchantMemberInfo.setScoreplan(merchantDetailInfoResponse.getScoreplan());
+			merchantMemberInfo.setBackgroundurl(merchantDetailInfoResponse.getBackgroundurl());
+			
+			//error friend
+//			FriendExample memberInfoExample  = new FriendExample();
+//			memberInfoExample.createCriteria().andFromuseridfkEqualTo(friend.getTargetuseridfk()).andTargetuseridfkEqualTo(id);
+//			List<Friend> list = friendMapper.selectByExample(memberInfoExample);
+//			if (list.isEmpty()) {
+//				throw new MemberAppException(
+//						WebserviceErrors.LIST_EMPTY_ERROR_CODE,
+//						WebserviceErrors.LIST_EMPTY_ERROR_MESSAGE); 
+//			}
+//			Friend memberInfo = list.get(0);
+			merchantMemberInfo.setFriendId(friend.getId());
+			merchantMemberInfo.setIsmember(friend.getIsmember());
+			merchantMemberInfo.setAmount(friend.getAmount());
+			merchantMemberInfo.setAmountcount(friend.getAmountcount());
+			merchantMemberInfo.setScore(friend.getScore());
+			merchantList.add(merchantMemberInfo);
+		}
+		merchantDetailListResponse.setMerchantList(merchantList);
+		return merchantDetailListResponse;
+	}
+	public void updateMemberInfo(Friend friend) {
+		friendMapper.updateByPrimaryKeySelective(friend);
 	}
 
 }

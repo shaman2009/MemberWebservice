@@ -1,7 +1,12 @@
-package com.dandelion.memberapp.model.vo;
+package com.dandelion.memberapp.model.bo;
 
 
-public class MerchantDetailInfoResponse {
+/**
+ * Return API MyMerchants
+ * @author FengxiangZhu
+ *
+ */
+public class MerchantMemberInfo {
 	private Long merchantId;
 	private String avatarurl;
 	private String name;
@@ -21,14 +26,18 @@ public class MerchantDetailInfoResponse {
 	private Integer amountcountrequired;
 	private Boolean scoreplan;
 	private String backgroundurl;
+	private Long friendId;
+	private boolean ismember;
+	private Long amount;
+	private Long amountcount;
+	private Long score;
 	private Long userId;
-	private String useremail;
-	private Integer friendcount;
-	private Integer fancount;
-	private Integer followcount;
-	private Integer articlecount;
-	
-	
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	public Long getMerchantId() {
 		return merchantId;
 	}
@@ -143,41 +152,36 @@ public class MerchantDetailInfoResponse {
 	public void setBackgroundurl(String backgroundurl) {
 		this.backgroundurl = backgroundurl;
 	}
-	public Long getUserId() {
-		return userId;
+	public Long getFriendId() {
+		return friendId;
 	}
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setFriendId(Long friendId) {
+		this.friendId = friendId;
 	}
-	public String getUseremail() {
-		return useremail;
+	public boolean isIsmember() {
+		return ismember;
 	}
-	public void setUseremail(String useremail) {
-		this.useremail = useremail;
+	public void setIsmember(boolean ismember) {
+		this.ismember = ismember;
 	}
-	public Integer getFriendcount() {
-		return friendcount;
+	public Long getAmount() {
+		return amount;
 	}
-	public void setFriendcount(Integer friendcount) {
-		this.friendcount = friendcount;
+	public void setAmount(Long amount) {
+		this.amount = amount;
 	}
-	public Integer getFancount() {
-		return fancount;
+	public Long getAmountcount() {
+		return amountcount;
 	}
-	public void setFancount(Integer fancount) {
-		this.fancount = fancount;
+	public void setAmountcount(Long amountcount) {
+		this.amountcount = amountcount;
 	}
-	public Integer getFollowcount() {
-		return followcount;
+	public Long getScore() {
+		return score;
 	}
-	public void setFollowcount(Integer followcount) {
-		this.followcount = followcount;
+	public void setScore(Long score) {
+		this.score = score;
 	}
-	public Integer getArticlecount() {
-		return articlecount;
-	}
-	public void setArticlecount(Integer articlecount) {
-		this.articlecount = articlecount;
-	}
-
+	
+	
 }

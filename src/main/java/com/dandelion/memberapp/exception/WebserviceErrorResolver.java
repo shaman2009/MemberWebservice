@@ -1,5 +1,7 @@
 package com.dandelion.memberapp.exception;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,7 +21,7 @@ public class WebserviceErrorResolver implements HandlerExceptionResolver {
 	private static final int Internal_Server_Error_CODE = 500;
 
 	@Override
-	public ModelAndView resolveException(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3) {
+	public ModelAndView resolveException(HttpServletRequest arg0, HttpServletResponse response, Object arg2, Exception arg3) {
 		if (!enable) {
 			return null;
 		}
@@ -36,7 +38,12 @@ public class WebserviceErrorResolver implements HandlerExceptionResolver {
 		}
 		logger.error("Error catched by OoPassErrorResolver: ", exception);
 		JSONObject json = JSONUtilities.getErrorJSON(exception);
-		arg1.setStatus(Internal_Server_Error_CODE);
+		try {
+			response.sendError(exception.getErrorCode(), String.valueOf(exception.getErrorCode()));
+			response.setStatus(Internal_Server_Error_CODE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return new ModelAndView("json", "j", json.toString());
 	}
 

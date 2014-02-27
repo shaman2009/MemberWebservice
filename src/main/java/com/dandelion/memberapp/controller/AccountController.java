@@ -1,11 +1,14 @@
 package com.dandelion.memberapp.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,13 +28,16 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dandelion.memberapp.exception.MemberAppException;
 import com.dandelion.memberapp.exception.WebserviceErrors;
 import com.dandelion.memberapp.interceptors.UserAuthentication;
+import com.dandelion.memberapp.model.po.Friend;
 import com.dandelion.memberapp.model.po.Member;
 import com.dandelion.memberapp.model.po.Merchant;
 import com.dandelion.memberapp.model.po.User;
 import com.dandelion.memberapp.model.po.Wsusersession;
 import com.dandelion.memberapp.model.vo.FriendsInfo;
 import com.dandelion.memberapp.model.vo.LoginInfo;
+import com.dandelion.memberapp.model.vo.MemberListResponse;
 import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
+import com.dandelion.memberapp.model.vo.MerchantDetailListResponse;
 import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
 import com.dandelion.memberapp.model.vo.ResponseResult;
 import com.dandelion.memberapp.model.vo.UserInfo;
@@ -49,7 +55,7 @@ public class AccountController {
 	private UserAuthentication userAuthentication;
 	
 	@RequestMapping(value = "/Register", method = RequestMethod.POST)
-	public ResponseEntity<ResponseResult> register(@RequestParam(value = "j", required = true) String j)throws  JSONException, MemberAppException {
+	public ResponseEntity<ResponseResult> register(@RequestParam(value = "j", required = true) String j, HttpServletResponse response)throws  JSONException, IOException, MemberAppException {
 
 		JSONObject json = new JSONObject(j);
 		String email = json.getString("email");
@@ -151,10 +157,32 @@ public class AccountController {
 		}
 	}
 	
-	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.PUT) 
+	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.POST) 
 	public ResponseEntity<ResponseResult> follow(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
 		User user = userAuthentication.getCurrentUser();
 		accountService.follow(user.getId(), id);
+		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
+	}
+	/**
+	 * update member info such as amout amoutcount and score.
+	 * @param j
+	 * @param id (not userid , tb_friend primary key) 
+	 * @return
+	 * @throws MemberAppException
+	 * @throws JSONException 
+	 */
+	@RequestMapping(value = "/Friends/{id}", method = RequestMethod.PUT) 
+	public ResponseEntity<ResponseResult> updateMemberInfo(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException, JSONException {
+		JSONObject json = new JSONObject(j);
+		long amount = json.optLong("amount");
+		long amountcount = json.optLong("amountcount");
+		long score = json.optLong("score");
+		Friend friend = new Friend();
+		friend.setId(id);
+		friend.setAmount(amount);
+		friend.setAmountcount(amountcount);
+		friend.setScore(score);
+		accountService.updateMemberInfo(friend);
 		return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}
 	
@@ -190,6 +218,21 @@ public class AccountController {
 		friendsInfo.setVoFollowers(voFollowers);
 		friendsInfo.setVoFollowings(voFollowings);
 		return new ResponseEntity<FriendsInfo>(friendsInfo, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/MyMembers", method = RequestMethod.GET) 
+	public ResponseEntity<MemberListResponse> getMyMembers(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
+		User self = userAuthentication.getCurrentUser();
+		MemberListResponse memberListResponse = accountService.getMyMembers(self.getId());
+		return new ResponseEntity<MemberListResponse>(memberListResponse, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/MyMerchants", method = RequestMethod.GET) 
+	public ResponseEntity<MerchantDetailListResponse> getMyMerchants(@RequestParam(value = "j", required = true) String j) throws MemberAppException {
+		User self = userAuthentication.getCurrentUser();
+		MerchantDetailListResponse merchantDetailListResponse = accountService.getMyMerchants(self.getId());
+		return new ResponseEntity<MerchantDetailListResponse>(merchantDetailListResponse, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/ForgetPassword", method = RequestMethod.POST)
@@ -305,7 +348,12 @@ public class AccountController {
 		accountService.updateMerchant(merchant, id);
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
-	
+	public static void main(String[] args) {
+		String s = "累計積分 : 262";
+        String[] strs = s.split(":");
+        long nowScore = Long.valueOf(strs[1].trim());
+        System.out.println(nowScore);
+	}
 	// Member
 	@RequestMapping(value = "/Members/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Member> getMember(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws MemberAppException {
