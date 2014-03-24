@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import com.dandelion.memberapp.dao.AccountDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -62,6 +63,8 @@ public class AccountService {
 	private NotificationService notificationService;
 	@Autowired
 	private FriendMapper friendMapper;
+    @Autowired
+    private AccountDao accountDao;
 	
 	//select ID from tb_TestConnection oopass
 	public void register(String email, String password, String alias, int accountType) throws MemberAppException {
@@ -175,14 +178,13 @@ public class AccountService {
 		user.setModifieddate(new Date());
 		accountMapper.updateUserInfo(user);
 	}
-	public String changePassword(String email) {
-		User user = new User();
-		user.setPassword(email);
-		user.setUseremail(email);
-		accountMapper.insertUser(user);
-//		List<User> list = accountMapper.getUserByEmail(email);
-//		String s = String.valueOf(list.size());
-		return "Dandelion";
+	public void changePassword(long id, String oldPassword, String newPassword) throws MemberAppException {
+        User user = accountDao.selectAccountByIdAndPassword(id, oldPassword);
+        if (user == null) new MemberAppException(
+                WebserviceErrors.PASSWORD_INVALID_CODE,
+                WebserviceErrors.PASSWORD_INVALID_MESSAGE);
+        user.setPassword(newPassword);
+        accountDao.updateAccount(user);
 	}
 	
 	public User getUserInfo(Long userId) {
@@ -228,27 +230,34 @@ public class AccountService {
 		
 		final String key = MailUtil.spliceString(email);
 		
-		try {
-			AsyncTaskExecutor task = new SimpleAsyncTaskExecutor();
-			task.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						boolean b = false;
-						b = MailUtil.sendMailViaSpring(user, email, key);
-						if(!b) {
-							throw new MemberAppException(WebserviceErrors.EMAIL_SEND_ERROR_CODE,WebserviceErrors.EMAIL_SEND_ERROR_MESSAGE);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			AsyncTaskExecutor task = new SimpleAsyncTaskExecutor();
+//			task.execute(new Runnable() {
+//				@Override
+//				public void run() {
+//					try {
+//						boolean b = false;
+//						b = MailUtil.sendMailViaSpring(user, email, key);
+//						if(!b) {
+//							throw new MemberAppException(WebserviceErrors.EMAIL_SEND_ERROR_CODE,WebserviceErrors.EMAIL_SEND_ERROR_MESSAGE);
+//						}
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			});
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
-		if (emailBean == null) {
+        try {
+            MailUtil.sendMailViaSpring(user, email, key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        if (emailBean == null) {
 			emailBean = new Emailbean();
 			emailBean.setId(user.getId());
 			emailBean.setToken(key);

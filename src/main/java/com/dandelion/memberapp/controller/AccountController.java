@@ -1,15 +1,11 @@
 package com.dandelion.memberapp.controller;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.dandelion.memberapp.exception.MemberAppException;
+import com.dandelion.memberapp.exception.WebserviceErrors;
+import com.dandelion.memberapp.interceptors.UserAuthentication;
+import com.dandelion.memberapp.model.po.*;
+import com.dandelion.memberapp.model.vo.*;
+import com.dandelion.memberapp.service.AccountService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -23,26 +19,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
-import com.dandelion.memberapp.exception.MemberAppException;
-import com.dandelion.memberapp.exception.WebserviceErrors;
-import com.dandelion.memberapp.interceptors.UserAuthentication;
-import com.dandelion.memberapp.model.po.Friend;
-import com.dandelion.memberapp.model.po.Member;
-import com.dandelion.memberapp.model.po.Merchant;
-import com.dandelion.memberapp.model.po.User;
-import com.dandelion.memberapp.model.po.Wsusersession;
-import com.dandelion.memberapp.model.vo.FriendsInfo;
-import com.dandelion.memberapp.model.vo.LoginInfo;
-import com.dandelion.memberapp.model.vo.MemberListResponse;
-import com.dandelion.memberapp.model.vo.MerchantDetailInfoResponse;
-import com.dandelion.memberapp.model.vo.MerchantDetailListResponse;
-import com.dandelion.memberapp.model.vo.MerchantInfoListResponse;
-import com.dandelion.memberapp.model.vo.ResponseResult;
-import com.dandelion.memberapp.model.vo.UserInfo;
-import com.dandelion.memberapp.model.vo.UserList;
-import com.dandelion.memberapp.service.AccountService;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 @Controller
 public class AccountController {
@@ -267,14 +252,13 @@ public class AccountController {
 		accountService.forgetPassword(key, password);
 		return "forgetpassword";
 	}
-	@RequestMapping(value = "/ChangePassword", method = RequestMethod.POST)
-	public ModelAndView changePassword(@RequestParam(value = "j", required = true) String j) throws JSONException {
-			JSONObject json = new JSONObject(j);
-			String email = json.getString("email");
-			String res = accountService.changePassword(email);
-			JSONObject result = new JSONObject();
-			result.put("email", res);
-			return new ModelAndView("json", "j", result.toString());
+	@RequestMapping(value = "/ChangePassword/{id}", method = RequestMethod.POST)
+	public ResponseEntity<ResponseResult> changePassword(@RequestParam(value = "j", required = true) String j, @PathVariable Long id) throws JSONException, MemberAppException {
+        JSONObject json = new JSONObject(j);
+        String oldPassword = json.getString("oldPassword");
+        String newPassword = json.getString("newPassword");
+        accountService.changePassword(id, oldPassword, newPassword);
+        return new ResponseEntity<ResponseResult>(HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "Test") 

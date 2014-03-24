@@ -177,14 +177,14 @@ public class MailUtil {
 		sb.append("<html><head>")
 				.append("<meta http-equiv='content-type' content='text/html; charset=utf-8'>")
 				.append("</head><body>").append("您好,").append(userName)
-				.append(" : ").append(WRAP).append("您申请重置账号，如非本人操作，请忽略此邮件。")
-				.append(WRAP).append(WRAP).append("立即重置密码,")
-				.append("请点击下面的地址:")
+				.append(" : ").append(WRAP).append("您申請重置賬號，如非被人操作，請忽略此郵件。")
+				.append(WRAP).append(WRAP).append("立即重置密碼,")
+				.append("請點擊下面的地址:")
 				.append("<a href=" + "\"" + getKeyStr(email, key) + "\"" + ">")
-				.append(" 请点击这里 ").append("</a>").append("完成修改密码").append(WRAP)
+				.append(" 請點擊這裡 ").append("</a>").append("完成修改密碼").append(WRAP)
 				.append(getKeyStr(email, key)).append(WRAP).append(WRAP)
 				.append("祝您使用愉快！").append(WRAP);
-		sb.append("琥智数码科技有限公司").append("</body></html>");
+		sb.append("MemberAPP團隊").append("</body></html>");
 		return sb.toString();
 	}
 

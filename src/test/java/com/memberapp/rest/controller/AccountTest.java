@@ -1,14 +1,5 @@
 package com.memberapp.rest.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.UUID;
-
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -18,21 +9,30 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * @author FengxiangZhu
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
+@TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @WebAppConfiguration
 @ContextConfiguration({ "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml" })
-public class AccountTest {
+public class AccountTest extends AbstractTransactionalJUnit4SpringContextTests {
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
@@ -106,16 +106,114 @@ public class AccountTest {
 					.andExpect(status().isOk());
 	}
 	
-//	@Test
+	@Test
 	public void ForgetPasswordTest() throws Exception {
+        String email = "wow2009zfx@gmail.com";
+        String password = UUID.randomUUID().toString();
+        JSONObject registerRequestParams = new JSONObject();
+        registerRequestParams.put("email", email);
+        registerRequestParams.put("password", password);
+        registerRequestParams.put("accountType", 0);
+        registerRequestParams.put("alias", UUID.randomUUID().toString());
+        this.mockMvc.perform(post(REGISTERURL)
+                .param("j", registerRequestParams.toString()))
+                .andDo(print())
+                .andExpect(status().isOk());
+
 		JSONObject forgetPasswordRequestParams = new JSONObject();
-		forgetPasswordRequestParams.put("email", "wow2009zfx@gmail.com");
+		forgetPasswordRequestParams.put("email", email);
 		this.mockMvc.perform(post(FORGETPASSWORDURL)
 					.param("j", forgetPasswordRequestParams.toString()))
 					.andDo(print())
 					.andExpect(status().isOk());
-	}	
-	@Test
+	}
+
+    @Test
+         public void ChangePasswordSuccess() throws Exception {
+        String email = "wow2009zfx@gmail.com";
+        String oldPassword = UUID.randomUUID().toString();
+        JSONObject registerRequestParams = new JSONObject();
+        registerRequestParams.put("email", email);
+        registerRequestParams.put("password", oldPassword);
+        registerRequestParams.put("accountType", 1);
+        registerRequestParams.put("alias", UUID.randomUUID().toString());
+        this.mockMvc.perform(post(REGISTERURL)
+                .param("j", registerRequestParams.toString()))
+                .andExpect(status().isOk());
+        JSONObject loginRequestParams = new JSONObject();
+        loginRequestParams.put("email", email);
+        loginRequestParams.put("password", oldPassword);
+        loginRequestParams.put("packageName", "com.dandelion.memberapp");
+        loginRequestParams.put("identifier", UUID.randomUUID());
+        String loginResponse = this.mockMvc.perform(post(LOGINURL)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JSONObject response = new JSONObject(loginResponse);
+        String sid = response.getString("sid");
+        String userId = response.getString("userId");
+
+        String newPassword = UUID.randomUUID().toString();
+        loginRequestParams.put("oldPassword", oldPassword);
+        loginRequestParams.put("newPassword", newPassword);
+        loginRequestParams.put("sid", sid);
+        this.mockMvc.perform(post("/ChangePassword/" + userId)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        loginRequestParams.put("email", email);
+        loginRequestParams.put("password", newPassword);
+        loginRequestParams.put("packageName", "com.dandelion.memberapp");
+        loginRequestParams.put("identifier", UUID.randomUUID());
+        this.mockMvc.perform(post(LOGINURL)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    public void ChangePasswordFailed() throws Exception {
+        String email = "wow2009zfx@gmail.com";
+        String oldPassword = UUID.randomUUID().toString();
+        JSONObject registerRequestParams = new JSONObject();
+        registerRequestParams.put("email", email);
+        registerRequestParams.put("password", oldPassword);
+        registerRequestParams.put("accountType", 1);
+        registerRequestParams.put("alias", UUID.randomUUID().toString());
+        this.mockMvc.perform(post(REGISTERURL)
+                .param("j", registerRequestParams.toString()))
+                .andExpect(status().isOk());
+        JSONObject loginRequestParams = new JSONObject();
+        loginRequestParams.put("email", email);
+        loginRequestParams.put("password", oldPassword);
+        loginRequestParams.put("packageName", "com.dandelion.memberapp");
+        loginRequestParams.put("identifier", UUID.randomUUID());
+        String loginResponse = this.mockMvc.perform(post(LOGINURL)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JSONObject response = new JSONObject(loginResponse);
+        String sid = response.getString("sid");
+        String userId = response.getString("userId");
+
+        String newPassword = UUID.randomUUID().toString();
+        loginRequestParams.put("oldPassword", oldPassword);
+        loginRequestParams.put("newPassword", newPassword);
+        loginRequestParams.put("sid", sid);
+        this.mockMvc.perform(post("/ChangePassword/" + userId)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        loginRequestParams.put("email", email);
+        loginRequestParams.put("password", oldPassword);
+        loginRequestParams.put("packageName", "com.dandelion.memberapp");
+        loginRequestParams.put("identifier", UUID.randomUUID());
+        this.mockMvc.perform(post(LOGINURL)
+                .param("j", loginRequestParams.toString()))
+                .andExpect(status().is(HttpStatus.SC_INTERNAL_SERVER_ERROR))
+                .andReturn().getResponse().getContentAsString();
+    }
+    @Test
 	public void UpdateUserTest() throws Exception {
 		String email = UUID.randomUUID().toString() + "@junit.com";
 		String password = UUID.randomUUID().toString();
@@ -379,7 +477,6 @@ public class AccountTest {
 		String userId = response.getString("userId");
 		JSONObject searchUserRequestParams = new JSONObject();
 		searchUserRequestParams.put("key", "1");
-		searchUserRequestParams.put("merchantId", "2001");
 		searchUserRequestParams.put("sid", sid);
 		String merchantsResponse = this.mockMvc.perform(get("/Merchants")
 					.param("j", searchUserRequestParams.toString()))
