@@ -1,8 +1,13 @@
 package com.dandelion.memberapp.controller;
 
-import java.util.Date;
-import java.util.List;
-
+import com.dandelion.memberapp.exception.MemberAppException;
+import com.dandelion.memberapp.model.bo.NotificationInfo;
+import com.dandelion.memberapp.model.po.Member;
+import com.dandelion.memberapp.model.po.Notification;
+import com.dandelion.memberapp.model.vo.NotificationListResponse;
+import com.dandelion.memberapp.model.vo.ResponseResult;
+import com.dandelion.memberapp.service.AccountService;
+import com.dandelion.memberapp.service.NotificationService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.dandelion.memberapp.exception.MemberAppException;
-import com.dandelion.memberapp.model.bo.NotificationInfo;
-import com.dandelion.memberapp.model.po.Member;
-import com.dandelion.memberapp.model.po.Notification;
-import com.dandelion.memberapp.model.vo.NotificationListResponse;
-import com.dandelion.memberapp.model.vo.ResponseResult;
-import com.dandelion.memberapp.service.AccountService;
-import com.dandelion.memberapp.service.NotificationService;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 public class NotificationController {

@@ -232,13 +232,7 @@ public class AccountController {
 	//web
 	@RequestMapping(value = "/ResetPassword", method = RequestMethod.GET)
 	public String resetPassword(Locale locale, Model model, @RequestParam(value = "key", required = false) String key) {
-//		boolean b = accountService.checkForgetPasswordToken(key);
-//		model.addAttribute("key",key);
-//		if(b) {
-//			return "forgetpassword";
-//		} else {
-//			return "error";
-//		}
+
 		
 		return "forgetpassword";
 	}
