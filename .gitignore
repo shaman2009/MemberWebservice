@@ -13,3 +13,8 @@
 .idea/*
 build/*
 *.iml
+
+
+
+# Mysql account
+/resources/112

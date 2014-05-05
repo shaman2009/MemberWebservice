@@ -366,6 +366,14 @@
 					<mainClass>org.test.int1.Main</mainClass>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <warName>indefensible-membership</warName>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -380,5 +388,16 @@
 				</resources>
 			</build>
 		</profile>
+        <profile>
+            <id>112</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>resources/112/</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
 	</profiles>
 </project>
